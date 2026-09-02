@@ -24,14 +24,13 @@
       '<span>🕗 08.00–17.00 WIB</span></div>'+
     '</div></div>'+
     '<div class="container"><nav class="nav">'+
-      '<a class="brand" href="index.html">'+
+      '<a class="brand" href="index.html" id="brand-link" title="Beranda">'+
         '<span class="brand__logo"><img src="assets/img/logo-hkti.png" alt="HKTI"></span>'+
         '<span><span class="brand__t">HKTI Ponorogo</span><br>'+
         '<span class="brand__s">Himpunan Kerukunan Tani Indonesia</span></span>'+
       '</a>'+
       '<ul class="menu" id="menu">'+items+'</ul>'+
       '<div class="nav__cta">'+
-        '<a class="btn btn--outline btn--sm" href="admin.html">Admin</a>'+
         '<a class="btn btn--gold btn--sm" href="keanggotaan.html#daftar">Daftar Anggota</a>'+
         '<button class="hamburger" id="burger" aria-label="Menu">'+
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>'+
@@ -47,7 +46,7 @@
         '<span class="brand__s">Sekretariat Kabupaten</span></span></div>'+
         '<p style="color:#a9c9b0;font-size:.88rem;max-width:34ch">Wadah penghimpun potensi insan tani Kabupaten Ponorogo menuju pertanian yang maju, mandiri, dan sejahtera.</p></div>'+
       '<div><h4>Tautan</h4><a href="tentang.html">Tentang HKTI</a><a href="program.html">Program</a><a href="berita.html">Berita</a><a href="keanggotaan.html">Keanggotaan</a></div>'+
-      '<div><h4>Layanan</h4><a href="verifikasi.html">Verifikasi Kartu</a><a href="keanggotaan.html#daftar">Pendaftaran</a><a href="admin.html">Portal Admin</a><a href="https://hkti.org" target="_blank" rel="noopener">HKTI Pusat ↗</a></div>'+
+      '<div><h4>Layanan</h4><a href="verifikasi.html">Verifikasi Kartu</a><a href="keanggotaan.html#daftar">Pendaftaran</a><a href="profil.html">Profil Anggota</a><a href="https://hkti.org" target="_blank" rel="noopener">HKTI Pusat ↗</a></div>'+
       '<div><h4>Kontak</h4>'+
         '<a href="mailto:mediacenterhkti@gmail.com">mediacenterhkti@gmail.com</a>'+
         '<a href="tel:081360725055">0813-6072-5055</a>'+
@@ -65,6 +64,13 @@
     if(f){f.className='footer';f.innerHTML=footer();}
     var burger=document.getElementById('burger'),menu=document.getElementById('menu');
     if(burger)burger.addEventListener('click',function(){menu.classList.toggle('open');});
+    // Admin tersembunyi: klik logo/brand 2x untuk masuk portal admin
+    var bl=document.getElementById('brand-link');
+    if(bl){var tmr=null;
+      bl.addEventListener('click',function(e){e.preventDefault();clearTimeout(tmr);
+        tmr=setTimeout(function(){location.href='index.html';},250);});
+      bl.addEventListener('dblclick',function(e){e.preventDefault();clearTimeout(tmr);location.href='admin.html';});
+    }
     document.addEventListener('click',function(e){
       var t=e.target.closest&&e.target.closest('[data-flip]');
       if(t){var el=document.getElementById(t.getAttribute('data-flip'));if(el)el.classList.toggle('flip');}
