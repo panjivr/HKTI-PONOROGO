@@ -19,9 +19,9 @@
   --font:'Plus Jakarta Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;overflow-x:hidden}
 body{margin:0;font-family:var(--font);color:var(--ink);background:var(--bg);
-  line-height:1.65;-webkit-font-smoothing:antialiased;font-size:16px}
+  line-height:1.65;-webkit-font-smoothing:antialiased;font-size:16px;overflow-x:hidden}
 img{max-width:100%;display:block}
 a{color:var(--green-700);text-decoration:none}
 h1,h2,h3,h4{line-height:1.2;margin:0 0 .5em;font-weight:800;letter-spacing:-.01em}
@@ -67,6 +67,7 @@ p{margin:0 0 1rem}
 .menu{display:flex;gap:2px;align-items:center;list-style:none;margin:0;padding:0;flex-wrap:wrap;justify-content:center}
 .menu a{padding:.5rem .62rem;border-radius:8px;color:var(--ink);font-weight:600;font-size:.9rem;white-space:nowrap}
 .menu a:hover,.menu a.active{background:var(--green-050);color:var(--green-800)}
+.menu-cta{display:none}
 .nav__cta{display:flex;gap:8px;align-items:center}
 .hamburger{display:none;background:none;border:0;cursor:pointer;padding:8px;color:var(--green-800)}
 .hamburger svg{width:26px;height:26px}
@@ -292,8 +293,9 @@ table.tbl{width:100%;border-collapse:collapse;font-size:.9rem;min-width:720px}
   .footer__grid{grid-template-columns:1fr 1fr}
   .menu,.nav__cta .btn--outline{display:none}
   .menu.open{display:flex;position:absolute;top:100%;left:0;right:0;flex-direction:column;
-    background:#fff;border-bottom:1px solid var(--line);padding:12px;gap:2px;box-shadow:var(--shadow-md)}
-  .menu.open a{padding:.8rem 1rem}
+    background:#fff;border-bottom:1px solid var(--line);padding:12px;gap:2px;box-shadow:var(--shadow-md);max-height:80vh;overflow:auto}
+  .menu.open a:not(.btn){padding:.8rem 1rem}
+  .menu.open .menu-cta{display:block;margin-top:8px}
   .hamburger{display:block}
   .nav{position:relative}
 }
@@ -303,6 +305,19 @@ table.tbl{width:100%;border-collapse:collapse;font-size:.9rem;min-width:720px}
   .band{padding:32px 22px}
   .deflist div{grid-template-columns:1fr}
   .deflist dt{color:var(--muted);font-size:.78rem}
+  /* header rapih di HP: sembunyikan subjudul brand & rampingkan topbar */
+  .brand__s{display:none}
+  .brand__t{font-size:1.06rem}
+  .brand__logo{width:42px;height:42px}
+  .nav{padding:10px 16px;gap:10px}
+  .nav__cta{gap:6px}
+  .topbar{font-size:.72rem}
+  .topbar .container{gap:4px 14px;padding:6px 16px}
+  .topbar .tb-right a[href^="mailto:"],.topbar .tb-right span{display:none}
+  .nav__cta .btn--gold{display:none}
+  .hero .container{padding-top:40px;padding-bottom:44px}
+  .page-hero{padding:40px 0}
+  .band{gap:20px}
 }
 @media print{
   .site-header,.footer,.no-print{display:none!important}

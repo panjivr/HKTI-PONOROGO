@@ -29,7 +29,7 @@
         '<span><span class="brand__t">HKTI DPC Ponorogo</span><br>'+
         '<span class="brand__s">Himpunan Kerukunan Tani Indonesia</span></span>'+
       '</a>'+
-      '<ul class="menu" id="menu">'+items+'</ul>'+
+      '<ul class="menu" id="menu">'+items+'<li class="menu-cta"><a class="btn btn--gold btn--block" href="keanggotaan.html#daftar">＋ Daftar Anggota</a></li></ul>'+
       '<div class="nav__cta">'+
         '<a class="btn btn--gold btn--sm" href="keanggotaan.html#daftar">Daftar Anggota</a>'+
         '<button class="hamburger" id="burger" aria-label="Menu">'+
