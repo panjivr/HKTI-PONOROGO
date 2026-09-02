@@ -77,7 +77,8 @@
   <h3 style="margin-bottom:6px">Kartu Tanda Anggota</h3>
   <p class="muted" style="font-size:.85rem;margin-bottom:16px">Ketuk <b>Balik Kartu</b> untuk melihat data &amp; QR di belakang.</p>
   <div id="kartu-holder"></div>
-  <button class="btn btn--outline btn--block no-print" style="margin-top:16px" data-close>Tutup</button>
+  <button class="btn btn--gold btn--block no-print" style="margin-top:16px" id="btn-dl-kartu">⬇️ Unduh Kartu (PNG)</button>
+  <button class="btn btn--outline btn--block no-print" style="margin-top:10px" data-close>Tutup</button>
 </div></div>
 
 <!-- MODAL: QR -->
@@ -186,6 +187,7 @@
     document.getElementById('kartu-holder').innerHTML=HKTI.ktaCard(current,'pf');
     HKTI.drawKtaQR('pf',current.id); open('m-kartu');
   };
+  document.getElementById('btn-dl-kartu').onclick=function(){HKTI.downloadCardPNG(current);};
   // QR anggota
   document.getElementById('btn-absensi').onclick=function(){
     var box=document.getElementById('qr-holder'); box.innerHTML='';

@@ -122,6 +122,55 @@
       return Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return a.id.localeCompare(b.id);});},
     mergedFind:function(id){id=(id||'').trim().toUpperCase();return this.merged().find(function(m){
       return m.id.toUpperCase()===id||m.nia===id||m.nia.replace(/\D/g,'')===id.replace(/\D/g,'');});},
+    // Render Kartu Tanda Anggota (layout foto+data) ke PNG seukuran kartu
+    cardPNG:function(m,cb){
+      var self=this,W=1350,H=855,c=document.createElement('canvas');c.width=W;c.height=H;
+      var g=c.getContext('2d');
+      function paint(){
+        g.clearRect(0,0,W,H);
+        g.fillStyle='#f3f4f1';g.fillRect(0,0,W,H);
+        g.fillStyle='rgba(20,60,30,0.04)';
+        for(var yy=40;yy<H-40;yy+=28)for(var xx=24;xx<W;xx+=28){g.beginPath();g.arc(xx,yy,1.5,0,7);g.fill();}
+        function bar(y0){var lg=g.createLinearGradient(0,0,W,0);lg.addColorStop(0,'#164e26');lg.addColorStop(1,'#43a047');g.fillStyle=lg;g.fillRect(0,y0,W,70);}
+        bar(0);bar(H-70);
+        var px=110,py=300,pw=280,ph=350;
+        // header: logo (tengah, agak besar) + judul, sebagai satu grup terpusat
+        var lh=150,lw=logo&&logo.width?logo.width*(lh/logo.height):150;
+        g.textBaseline='middle';
+        var t1='KARTU TANDA ANGGOTA',t2='HIMPUNAN KERUKUNAN TANI INDONESIA';
+        g.font='800 48px "Plus Jakarta Sans",system-ui,sans-serif';var w1=g.measureText(t1).width;
+        g.font='500 31px "Plus Jakarta Sans",system-ui,sans-serif';var w2=g.measureText(t2).width;
+        var tw=Math.max(w1,w2),gap=30,total=lw+gap+tw,sx=(W-total)/2,cy=178;
+        if(logo&&logo.width)g.drawImage(logo,sx,cy-lh/2,lw,lh);
+        var tx=sx+lw+gap;
+        g.fillStyle='#1b241d';g.font='800 48px "Plus Jakarta Sans",system-ui,sans-serif';g.fillText(t1,tx,cy-18);
+        g.fillStyle='#3a3f3a';g.font='500 31px "Plus Jakarta Sans",system-ui,sans-serif';g.fillText(t2,tx,cy+24);
+        // foto
+        if(photo&&photo.width){var s=Math.max(pw/photo.width,ph/photo.height),dw=photo.width*s,dh=photo.height*s;
+          g.save();g.beginPath();g.rect(px,py,pw,ph);g.clip();g.drawImage(photo,px+(pw-dw)/2,py+(ph-dh)/2,dw,dh);g.restore();
+        }else{g.fillStyle='#e8f3ea';g.fillRect(px,py,pw,ph);g.fillStyle='#1b5e20';g.font='800 96px system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(self.initials(m&&m.nama),px+pw/2,py+ph/2);g.textAlign='left';}
+        g.strokeStyle='#cfd8d0';g.lineWidth=2;g.strokeRect(px,py,pw,ph);
+        // data
+        var rows=[['No. ID',m.nia],['Nama',m.nama],['Alamat',(m.alamat&&m.alamat!=='-')?m.alamat:'-'],['Desa/Kelurahan',m.desa||'-'],['Kecamatan',m.kecamatan||'-'],['Kota/Kab','Kab. Ponorogo'],['Provinsi','Jawa Timur']];
+        var bx=470,cx=bx+278,vx=bx+312,vy=326,rh=48,vmax=W-vx-40;g.textBaseline='alphabetic';
+        for(var i=0;i<rows.length;i++){var y=vy+i*rh;
+          g.fillStyle='#1b241d';g.font='400 31px "Plus Jakarta Sans",system-ui,sans-serif';
+          g.fillText(rows[i][0],bx,y);g.fillText(':',cx,y);
+          g.font='600 31px "Plus Jakarta Sans",system-ui,sans-serif';
+          var val=String(rows[i][1]||'-');if(g.measureText(val).width>vmax){while(g.measureText(val+'…').width>vmax&&val.length>4)val=val.slice(0,-1);val+='…';}
+          g.fillText(val,vx,y);
+        }
+        cb(c.toDataURL('image/png'));
+      }
+      var logo=null,photo=null,pending=1;
+      function done(){if(!--pending)paint();}
+      function loadImg(src,set){pending++;var im=new Image();im.crossOrigin='anonymous';im.onload=function(){set(im);done();};im.onerror=function(){done();};im.src=src;}
+      loadImg('assets/img/logo-hkti.png',function(i){logo=i;});
+      if(m&&m.foto)loadImg(m.foto,function(i){photo=i;});
+      var ready=(document.fonts&&document.fonts.ready)?document.fonts.ready:Promise.resolve();
+      ready.then(done);
+    },
+    downloadCardPNG:function(m){this.cardPNG(m,function(url){var a=document.createElement('a');a.href=url;a.download='KTA_'+String(m.nia||m.id).replace(/[^\w.-]/g,'')+'.png';document.body.appendChild(a);a.click();a.remove();});},
     resizePhoto:function(file,cb){var r=new FileReader();r.onload=function(ev){var img=new Image();
       img.onload=function(){var s=360,cv=document.createElement('canvas');
         var sc=Math.min(s/img.width,s/img.height,1),w=img.width*sc,h=img.height*sc;
