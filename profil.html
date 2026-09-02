@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Profil Anggota — HKTI Ponorogo</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="profil.html">
+<header id="site-header"></header>
+
+<!-- LOGIN -->
+<section class="section" id="login-sec"><div class="container">
+  <div class="tool-wrap">
+    <form class="card" id="login-form">
+      <div class="card__icon">👤</div>
+      <h3>Masuk Akun Anggota</h3>
+      <p class="muted" style="font-size:.9rem">Masuk dengan Nomor Induk Anggota (NIA) untuk melengkapi data &amp; foto Anda.</p>
+      <div class="field"><label>Nomor Induk Anggota (NIA) / No. ID</label><input class="input" id="lg-id" placeholder="mis. 3502.24.0001" autocomplete="off"></div>
+      <div class="field"><label>Kata Sandi</label><input class="input" type="password" id="lg-pw" placeholder="Kata sandi akun"></div>
+      <button class="btn btn--block" type="submit">Masuk</button>
+      <div class="notice" style="margin-top:14px">Login pertama kali: masukkan NIA Anda dan buat kata sandi baru — kata sandi itu akan tersimpan untuk login berikutnya. <b>Demo</b>: data &amp; sandi tersimpan di perangkat ini (localStorage). Produksi memakai autentikasi server.</div>
+      <p class="muted center" style="font-size:.82rem;margin:12px 0 0">Belum jadi anggota? <a href="keanggotaan.html#daftar">Daftar di sini</a></p>
+    </form>
+  </div>
+</div></section>
+
+<!-- PROFILE -->
+<section id="profile-sec" style="display:none">
+  <div class="profile-shell">
+    <div class="profile-hero">
+      <div class="profile-hero__top">
+        <h1>Profil Saya</h1>
+        <div class="profile-hero__actions">
+          <button id="btn-refresh" title="Muat ulang">⟳</button>
+          <button id="btn-logout" title="Keluar">⎋</button>
+        </div>
+      </div>
+      <div class="profile-ava" id="ava"></div>
+      <input type="file" id="foto-file" accept="image/*" hidden>
+      <div class="profile-name" id="p-name">—</div>
+      <span class="profile-badge" id="p-badge">Anggota</span>
+      <div class="profile-loc" id="p-loc">📍 Kab. Ponorogo, Jawa Timur</div>
+    </div>
+
+    <div class="profile-card">
+      <div class="pc-row">
+        <div class="pc-ico">🪪</div>
+        <div class="grow"><small>Nomor Anggota</small><b id="p-nia">—</b></div>
+        <button class="btn btn--sm" id="btn-kartu">Lihat Kartu</button>
+      </div>
+      <button class="pc-row" id="btn-absensi" style="background:none;border:0;width:100%;cursor:pointer;text-align:left">
+        <div class="pc-ico">🔳</div>
+        <div class="grow"><b style="font-size:.98rem">QR Code Anggota</b><small>Tunjukkan untuk verifikasi / absensi kegiatan</small></div>
+        <span class="chev">›</span>
+      </button>
+      <div class="pc-contact">
+        <span>✉️ <span id="p-email">—</span></span>
+        <span>📞 <span id="p-hp">—</span></span>
+      </div>
+    </div>
+
+    <div class="section-label">Akun Saya</div>
+    <div class="menu-card">
+      <button class="menu-item" id="btn-edit"><div class="pc-ico" style="width:38px;height:38px;font-size:1.1rem">✏️</div><span class="grow">Edit Profil &amp; Lengkapi Data</span><span class="chev">›</span></button>
+      <button class="menu-item" id="btn-pw"><div class="pc-ico" style="width:38px;height:38px;font-size:1.1rem;background:#fff4e0;color:var(--warn)">🔒</div><span class="grow">Ubah Password</span><span class="chev">›</span></button>
+    </div>
+    <div style="height:40px"></div>
+  </div>
+</section>
+
+<!-- MODAL: Kartu -->
+<div class="modal-wrap" id="m-kartu"><div class="modal-card">
+  <h3 style="margin-bottom:6px">Kartu Tanda Anggota</h3>
+  <p class="muted" style="font-size:.85rem;margin-bottom:16px">Ketuk <b>Balik Kartu</b> untuk melihat data &amp; QR di belakang.</p>
+  <div id="kartu-holder"></div>
+  <button class="btn btn--outline btn--block no-print" style="margin-top:16px" data-close>Tutup</button>
+</div></div>
+
+<!-- MODAL: QR -->
+<div class="modal-wrap" id="m-qr"><div class="modal-card center">
+  <h3>QR Code Anggota</h3>
+  <p class="muted" style="font-size:.85rem">Petugas memindai untuk membuka detail keanggotaan.</p>
+  <div id="qr-holder" style="width:200px;height:200px;margin:16px auto;padding:10px;border:1px solid var(--line);border-radius:14px;background:#fff"></div>
+  <div class="id-card__nia" id="qr-nia" style="font-size:.9rem;color:var(--muted)"></div>
+  <button class="btn btn--outline btn--block" style="margin-top:16px" data-close>Tutup</button>
+</div></div>
+
+<!-- MODAL: Edit -->
+<div class="modal-wrap" id="m-edit"><div class="modal-card">
+  <h3>Edit Profil</h3>
+  <p class="muted" style="font-size:.85rem;margin-bottom:12px">Lengkapi data yang masih kosong. Data yang sudah benar tidak perlu diubah.</p>
+  <div class="field"><label>Nama Lengkap</label><input class="input" id="e-nama"></div>
+  <div class="field"><label>Tempat, Tanggal Lahir</label><input class="input" id="e-ttl"></div>
+  <div class="field"><label>Alamat</label><input class="input" id="e-alamat"></div>
+  <div style="display:flex;gap:12px">
+    <div class="field" style="flex:1"><label>Desa/Kelurahan</label><input class="input" id="e-desa"></div>
+    <div class="field" style="flex:1"><label>Kecamatan</label><input class="input" id="e-kec"></div>
+  </div>
+  <div style="display:flex;gap:12px">
+    <div class="field" style="flex:1"><label>Email</label><input class="input" id="e-email" type="email"></div>
+    <div class="field" style="flex:1"><label>No. HP</label><input class="input" id="e-hp"></div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:6px">
+    <button class="btn btn--block" id="e-save">Simpan</button>
+    <button class="btn btn--outline btn--block" data-close>Batal</button>
+  </div>
+</div></div>
+
+<!-- MODAL: Password -->
+<div class="modal-wrap" id="m-pw"><div class="modal-card">
+  <h3>Ubah Password</h3>
+  <div class="field"><label>Kata Sandi Lama</label><input class="input" type="password" id="pw-old"></div>
+  <div class="field"><label>Kata Sandi Baru</label><input class="input" type="password" id="pw-new"></div>
+  <div style="display:flex;gap:10px;margin-top:6px">
+    <button class="btn btn--block" id="pw-save">Simpan</button>
+    <button class="btn btn--outline btn--block" data-close>Batal</button>
+  </div>
+</div></div>
+
+<footer id="site-footer"></footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+(function(){
+  var PWKEY='hkti_member_pw', SESS='hkti_member_id';
+  var loginSec=document.getElementById('login-sec'), profSec=document.getElementById('profile-sec');
+  var current=null;
+  function pwStore(){try{return JSON.parse(localStorage.getItem(PWKEY)||'{}');}catch(e){return {};}}
+  function setPw(id,pw){var s=pwStore();s[id]=pw;localStorage.setItem(PWKEY,JSON.stringify(s));}
+
+  // ---- login ----
+  document.getElementById('login-form').addEventListener('submit',function(e){
+    e.preventDefault();
+    var m=HKTI.mergedFind(document.getElementById('lg-id').value);
+    var pw=document.getElementById('lg-pw').value.trim();
+    if(!m){alert('NIA tidak ditemukan dalam basis data anggota.');return;}
+    if(!pw){alert('Masukkan kata sandi.');return;}
+    var store=pwStore();
+    if(store[m.id]===undefined){ setPw(m.id,pw); }        // first login sets password
+    else if(store[m.id]!==pw){ alert('Kata sandi salah.'); return; }
+    sessionStorage.setItem(SESS,m.id); openProfile(m.id);
+  });
+
+  function openProfile(id){
+    current=HKTI.mergedFind(id); if(!current){logout();return;}
+    loginSec.style.display='none'; profSec.style.display='block';
+    render();
+  }
+  function logout(){sessionStorage.removeItem(SESS);profSec.style.display='none';loginSec.style.display='block';}
+  document.getElementById('btn-logout').onclick=logout;
+  document.getElementById('btn-refresh').onclick=function(){openProfile(current.id);};
+
+  function render(){
+    var m=current;
+    document.getElementById('ava').innerHTML=HKTI.avatar(m)+'<button class="profile-cam" id="cam" title="Ganti foto">📷</button>';
+    document.getElementById('p-name').textContent=m.nama;
+    document.getElementById('p-badge').textContent=m.jabatan||'Anggota';
+    document.getElementById('p-loc').innerHTML='📍 '+(m.kecamatan&&m.kecamatan!=='-'?HKTI.esc(m.kecamatan)+', ':'')+'Kab. Ponorogo, Jawa Timur';
+    document.getElementById('p-nia').textContent=m.nia;
+    document.getElementById('p-email').textContent=m.email||'—';
+    document.getElementById('p-hp').textContent=m.hp||'—';
+    document.getElementById('cam').onclick=function(){document.getElementById('foto-file').click();};
+  }
+
+  // ---- upload foto ----
+  document.getElementById('foto-file').addEventListener('change',function(e){
+    var f=e.target.files[0]; if(!f)return;
+    HKTI.resizePhoto(f,function(data){ HKTI.saveOverride({id:current.id,foto:data}); openProfile(current.id); });
+  });
+
+  // ---- modals ----
+  function open(id){document.getElementById(id).classList.add('open');}
+  function closeAll(){[].forEach.call(document.querySelectorAll('.modal-wrap'),function(w){w.classList.remove('open');});}
+  document.addEventListener('click',function(e){
+    if(e.target.hasAttribute&&e.target.hasAttribute('data-close'))closeAll();
+    if(e.target.classList&&e.target.classList.contains('modal-wrap'))closeAll();
+  });
+
+  // Lihat Kartu
+  document.getElementById('btn-kartu').onclick=function(){
+    document.getElementById('kartu-holder').innerHTML=HKTI.ktaCard(current,'pf');
+    HKTI.drawKtaQR('pf',current.id); open('m-kartu');
+  };
+  // QR anggota
+  document.getElementById('btn-absensi').onclick=function(){
+    var box=document.getElementById('qr-holder'); box.innerHTML='';
+    new QRCode(box,{text:HKTI.verifyUrl(current.id),width:180,height:180,colorDark:'#0f3d1e',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
+    document.getElementById('qr-nia').textContent=current.nia; open('m-qr');
+  };
+  // Edit profil
+  document.getElementById('btn-edit').onclick=function(){
+    var m=current;
+    document.getElementById('e-nama').value=m.nama||'';
+    document.getElementById('e-ttl').value=(m.ttl&&m.ttl!=='-')?m.ttl:'';
+    document.getElementById('e-alamat').value=(m.alamat&&m.alamat!=='-')?m.alamat:'';
+    document.getElementById('e-desa').value=m.desa||'';
+    document.getElementById('e-kec').value=(m.kecamatan&&m.kecamatan!=='-')?m.kecamatan:'';
+    document.getElementById('e-email').value=m.email||'';
+    document.getElementById('e-hp').value=m.hp||'';
+    open('m-edit');
+  };
+  document.getElementById('e-save').onclick=function(){
+    HKTI.saveOverride({id:current.id,
+      nama:document.getElementById('e-nama').value||current.nama,
+      ttl:document.getElementById('e-ttl').value||current.ttl,
+      alamat:document.getElementById('e-alamat').value||current.alamat,
+      desa:document.getElementById('e-desa').value||'',
+      kecamatan:document.getElementById('e-kec').value||current.kecamatan,
+      email:document.getElementById('e-email').value||'',
+      hp:document.getElementById('e-hp').value||''});
+    closeAll(); openProfile(current.id);
+  };
+  // Ubah password
+  document.getElementById('btn-pw').onclick=function(){open('m-pw');};
+  document.getElementById('pw-save').onclick=function(){
+    var s=pwStore(),old=document.getElementById('pw-old').value,nw=document.getElementById('pw-new').value;
+    if(s[current.id]!==old){alert('Kata sandi lama salah.');return;}
+    if(!nw){alert('Kata sandi baru tidak boleh kosong.');return;}
+    setPw(current.id,nw);document.getElementById('pw-old').value='';document.getElementById('pw-new').value='';
+    closeAll();alert('Kata sandi berhasil diperbarui.');
+  };
+
+  // resume session
+  var sid=sessionStorage.getItem(SESS); if(sid)openProfile(sid);
+})();
+</script>
+</body>
+</html>

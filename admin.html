@@ -223,23 +223,8 @@
   var cm=document.getElementById('cardmodal');
   document.getElementById('c-close').addEventListener('click',function(){cm.style.display='none';});
   function showCard(m){
-    var holder=document.getElementById('card-holder');
-    holder.innerHTML=
-    '<div class="id-card" id="idcard">'+
-      '<div class="id-card__top"><span class="logo">HK</span>'+
-        '<span><b>KARTU TANDA ANGGOTA</b><br><span>HKTI KABUPATEN PONOROGO</span></span></div>'+
-      '<div class="id-card__body"><div>'+
-        '<div class="id-card__photo">'+HKTI.avatar(m)+
-          '<div><div class="id-card__field"><label>Nama</label><b>'+HKTI.esc(m.nama)+'</b></div>'+
-          '<div class="id-card__field"><label>NIA</label><b class="id-card__nia">'+HKTI.esc(m.nia)+'</b></div></div>'+
-        '</div>'+
-        '<div class="id-card__field"><label>Kecamatan</label><b>'+HKTI.esc(m.kecamatan||'—')+'</b></div>'+
-        '<div class="id-card__field"><label>Jabatan</label><b>'+HKTI.esc(m.jabatan||'Anggota')+'</b></div>'+
-      '</div><div class="id-card__qr" id="qrbox"></div></div>'+
-      '<div class="id-card__foot"><span>Periode '+HKTI.esc(m.periode||'—')+'</span><span>hkti-ponorogo</span></div>'+
-    '</div>';
-    new QRCode(document.getElementById('qrbox'),{text:HKTI.verifyUrl(m.id),width:100,height:100,
-      colorDark:'#0f3d1e',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
+    document.getElementById('card-holder').innerHTML=HKTI.ktaCard(m,'adm');
+    HKTI.drawKtaQR('adm',m.id);
     cm.style.display='block';
   }
 
