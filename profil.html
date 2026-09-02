@@ -75,7 +75,7 @@
 <!-- MODAL: Kartu -->
 <div class="modal-wrap" id="m-kartu"><div class="modal-card">
   <h3 style="margin-bottom:6px">Kartu Tanda Anggota</h3>
-  <p class="muted" style="font-size:.85rem;margin-bottom:16px">Ketuk <b>Balik Kartu</b> untuk melihat data &amp; QR di belakang.</p>
+  <p class="muted" style="font-size:.85rem;margin-bottom:16px">Kartu tanda anggota Anda — unduh sebagai PNG atau cetak.</p>
   <div id="kartu-holder"></div>
   <button class="btn btn--gold btn--block no-print" style="margin-top:16px" id="btn-dl-kartu">⬇️ Unduh Kartu (PNG)</button>
   <button class="btn btn--outline btn--block no-print" style="margin-top:10px" data-close>Tutup</button>
@@ -184,8 +184,10 @@
 
   // Lihat Kartu
   document.getElementById('btn-kartu').onclick=function(){
-    document.getElementById('kartu-holder').innerHTML=HKTI.ktaCard(current,'pf');
-    HKTI.drawKtaQR('pf',current.id); open('m-kartu');
+    var kh=document.getElementById('kartu-holder');
+    kh.innerHTML='<div class="muted center" style="padding:20px">Membuat kartu…</div>';
+    HKTI.cardPNG(current,function(url){kh.innerHTML='<img src="'+url+'" alt="Kartu Tanda Anggota" style="width:100%;display:block;border-radius:12px;border:1px solid var(--line)">';});
+    open('m-kartu');
   };
   document.getElementById('btn-dl-kartu').onclick=function(){HKTI.downloadCardPNG(current);};
   // QR anggota

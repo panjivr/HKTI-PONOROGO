@@ -224,8 +224,9 @@
   var cm=document.getElementById('cardmodal');
   document.getElementById('c-close').addEventListener('click',function(){cm.style.display='none';});
   function showCard(m){
-    document.getElementById('card-holder').innerHTML=HKTI.ktaCard(m,'adm');
-    HKTI.drawKtaQR('adm',m.id);
+    var h=document.getElementById('card-holder');
+    h.innerHTML='<div class="muted center" style="padding:26px">Membuat kartu…</div>';
+    HKTI.cardPNG(m,function(url){h.innerHTML='<img src="'+url+'" alt="Kartu Tanda Anggota" style="width:100%;display:block;border-radius:12px;border:1px solid var(--line)">';});
     document.getElementById('c-dl').onclick=function(){HKTI.downloadCardPNG(m);};
     cm.style.display='block';
   }
