@@ -160,7 +160,22 @@
           var val=String(rows[i][1]||'-');if(g.measureText(val).width>vmax){while(g.measureText(val+'…').width>vmax&&val.length>4)val=val.slice(0,-1);val+='…';}
           g.fillText(val,vx,y);
         }
-        cb(c.toDataURL('image/png'));
+        // Barcode QR (pindai → halaman verifikasi detail anggota)
+        var qs=200,qx=W-qs-80,qy=H-qs-118;
+        function finish(){cb(c.toDataURL('image/png'));}
+        if(window.QRCode){
+          var box=document.createElement('div');box.style.cssText='position:absolute;left:-9999px;top:0';document.body.appendChild(box);
+          try{new QRCode(box,{text:self.verifyUrl(m.id),width:qs,height:qs,colorDark:'#0f3d1e',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){}
+          setTimeout(function(){
+            var qc=box.querySelector('canvas')||box.querySelector('img');
+            g.fillStyle='#ffffff';g.fillRect(qx-14,qy-14,qs+28,qs+28);
+            g.strokeStyle='#cfd8d0';g.lineWidth=2;g.strokeRect(qx-14,qy-14,qs+28,qs+28);
+            if(qc){try{g.drawImage(qc,qx,qy,qs,qs);}catch(e){}}
+            g.fillStyle='#5c6b60';g.font='500 22px "Plus Jakarta Sans",system-ui,sans-serif';g.textAlign='center';
+            g.fillText('Pindai untuk verifikasi',qx+qs/2,qy+qs+30);g.textAlign='left';
+            document.body.removeChild(box);finish();
+          },60);
+        } else finish();
       }
       var logo=null,photo=null,pending=1;
       function done(){if(!--pending)paint();}
