@@ -1,4 +1,4 @@
-/* Shared chrome + helpers for HKTI Ponorogo */
+/* Shared chrome + helpers for HKTI DPC Ponorogo */
 (function(){
   var MENU=[
     ['index.html','Beranda'],
@@ -26,7 +26,7 @@
     '<div class="container"><nav class="nav">'+
       '<a class="brand" href="index.html" id="brand-link" title="Beranda">'+
         '<span class="brand__logo"><img src="assets/img/logo-hkti.png" alt="HKTI"></span>'+
-        '<span><span class="brand__t">HKTI Ponorogo</span><br>'+
+        '<span><span class="brand__t">HKTI DPC Ponorogo</span><br>'+
         '<span class="brand__s">Himpunan Kerukunan Tani Indonesia</span></span>'+
       '</a>'+
       '<ul class="menu" id="menu">'+items+'</ul>'+
@@ -42,18 +42,18 @@
     return '<div class="container"><div class="footer__grid">'+
       '<div><div class="brand" style="margin-bottom:14px">'+
         '<span class="brand__logo"><img src="assets/img/logo-hkti.png" alt="HKTI"></span>'+
-        '<span><span class="brand__t" style="color:#fff">HKTI Ponorogo</span><br>'+
+        '<span><span class="brand__t" style="color:#fff">HKTI DPC Ponorogo</span><br>'+
         '<span class="brand__s">Sekretariat Kabupaten</span></span></div>'+
         '<p style="color:#a9c9b0;font-size:.88rem;max-width:34ch">Wadah penghimpun potensi insan tani Kabupaten Ponorogo menuju pertanian yang maju, mandiri, dan sejahtera.</p></div>'+
       '<div><h4>Tautan</h4><a href="tentang.html">Tentang HKTI</a><a href="program.html">Program</a><a href="berita.html">Berita</a><a href="keanggotaan.html">Keanggotaan</a></div>'+
-      '<div><h4>Layanan</h4><a href="verifikasi.html">Verifikasi Kartu</a><a href="keanggotaan.html#daftar">Pendaftaran</a><a href="profil.html">Profil Anggota</a><a href="https://hkti.org" target="_blank" rel="noopener">HKTI Pusat ↗</a></div>'+
+      '<div><h4>Layanan</h4><a href="verifikasi.html">Verifikasi Kartu</a><a href="keanggotaan.html#daftar">Pendaftaran</a><a href="profil.html">Profil Anggota</a><a href="https://hkti.id" target="_blank" rel="noopener">HKTI Pusat (hkti.id) ↗</a></div>'+
       '<div><h4>Kontak</h4>'+
         '<a href="mailto:mediacenterhkti@gmail.com">mediacenterhkti@gmail.com</a>'+
         '<a href="tel:081360725055">0813-6072-5055</a>'+
         '<span style="display:block;color:#a9c9b0;font-size:.88rem;margin-top:6px">Sekretariat DPC HKTI Kabupaten Ponorogo, Jawa Timur</span></div>'+
     '</div><div class="footer__bottom">'+
-      '<span>© '+new Date().getFullYear()+' HKTI Kabupaten Ponorogo. Seluruh data anggota bersifat internal.</span>'+
-      '<span>Dibuat untuk digitalisasi keanggotaan HKTI Ponorogo</span>'+
+      '<span>© '+new Date().getFullYear()+' HKTI DPC Ponorogo. Seluruh data anggota bersifat internal.</span>'+
+      '<span>Dibuat untuk digitalisasi keanggotaan HKTI DPC Ponorogo</span>'+
     '</div></div>';
   }
 

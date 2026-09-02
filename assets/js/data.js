@@ -456,6 +456,38 @@ window.HKTI_NEWS = [
   "gambar": "https://hkti.org/wp-content/uploads/2023/07/20230714-Pelantikan-pengurus-DPC-Pertani-HKTI-Belitung.jpg"
  },
  {
+  "judul": "Temu Tani & Rakernas HKTI 2025 untuk Penguatan Petani",
+  "tanggal": "2025",
+  "kategori": "HKTI Nasional",
+  "ringkas": "Ketua Umum DPN HKTI Sudaryono resmi membuka Temu Tani 2025 dan Rapat Kerja Nasional (Rakernas) pertama HKTI di Bogor — momentum penguatan petani menuju kedaulatan pangan.",
+  "link": "https://hkti.id/berita.php?req=detail&id=59",
+  "gambar": "https://hkti.org/wp-content/uploads/2023/07/20230228_104328-1536x737-1.webp"
+ },
+ {
+  "judul": "HKTI Tetapkan 8 Rekomendasi Rakernas, Dukung Penuh Swasembada Pangan",
+  "tanggal": "2025",
+  "kategori": "HKTI Nasional",
+  "ringkas": "Rakernas HKTI 2025 merumuskan 8 rekomendasi: penguatan organisasi, dukungan program Presiden Prabowo–Gibran, keterlibatan di Program Makan Bergizi Gratis, hingga memperluas ekspor hasil tani.",
+  "link": "https://hkti.id/berita.php?req=detail&id=58",
+  "gambar": "https://hkti.org/wp-content/uploads/2023/07/IMG_20230720_063434.webp"
+ },
+ {
+  "judul": "Swasembada Beras Jadi Kenyataan, Petani Kembali Berdaya",
+  "tanggal": "2025",
+  "kategori": "HKTI Nasional",
+  "ringkas": "Indonesia menegaskan status swasembada beras 2025 dengan stok awal 2026 mencapai 12,53 juta ton — capaian yang mengembalikan posisi tawar dan keberdayaan petani.",
+  "link": "https://hkti.id/berita.php?req=detail&id=92",
+  "gambar": "https://hkti.org/wp-content/uploads/2023/06/WhatsApp-Image-2023-03-03-at-22.30.44.jpeg"
+ },
+ {
+  "judul": "Sudaryono: HKTI Siap Kawal & Sukseskan Program Prioritas Presiden",
+  "tanggal": "2025",
+  "kategori": "HKTI Nasional",
+  "ringkas": "Ketua Umum DPN HKTI Sudaryono menegaskan sektor pertanian tetap jadi prioritas pemerintah — menekankan modernisasi pertanian, akses permodalan, dan penguatan kelembagaan petani.",
+  "link": "https://hkti.id/berita.php?req=detail&id=94",
+  "gambar": "https://hkti.org/wp-content/uploads/2023/08/2WhatsApp-Image-2023-08-18-at-23.15.40-1-.webp"
+ },
+ {
   "judul": "Program HKTI Saba Desa, Bantu Atasi Kelangkaan Pupuk",
   "tanggal": "12 Januari 2024",
   "kategori": "Berita",
