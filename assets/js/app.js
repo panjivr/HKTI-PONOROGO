@@ -84,6 +84,8 @@
       return this.members().find(function(m){
         return m.id.toUpperCase()===id||m.nia===id||m.nia.replace(/\D/g,'')===id.replace(/\D/g,'');});},
     verifyUrl:function(id){var b=location.href.replace(/[^/]*$/,'');return b+'verifikasi.html?id='+encodeURIComponent(id);},
+    // Payload QR ringkas (cuma NIA) → sedikit kotak, tahan blur; dibaca "Pindai QR" di verifikasi
+    qrText:function(m){var d=String((m&&m.nia)||'').replace(/\D/g,'');return d||String((m&&m.id)||'');},
     esc:function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});},
     initials:function(nama){var p=String(nama||'?').replace(/[^A-Za-z\s]/g,'').trim().split(/\s+/);
       return ((p[0]||'?')[0]+(p.length>1?p[p.length-1][0]:'')).toUpperCase();},
@@ -160,19 +162,19 @@
           var val=String(rows[i][1]||'-');if(g.measureText(val).width>vmax){while(g.measureText(val+'…').width>vmax&&val.length>4)val=val.slice(0,-1);val+='…';}
           g.fillText(val,vx,y);
         }
-        // Barcode QR (pindai → halaman verifikasi detail anggota)
-        var qs=200,qx=W-qs-80,qy=H-qs-118;
+        // Barcode QR: payload ringkas (NIA) + EC tinggi → kotak sedikit & besar, tahan blur
+        var qs=210,pad=30,qx=W-qs-82,qy=H-qs-124;
         function finish(){cb(c.toDataURL('image/png'));}
         if(window.QRCode){
           var box=document.createElement('div');box.style.cssText='position:absolute;left:-9999px;top:0';document.body.appendChild(box);
-          try{new QRCode(box,{text:self.verifyUrl(m.id),width:qs,height:qs,colorDark:'#0f3d1e',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){}
+          try{new QRCode(box,{text:self.qrText(m),width:qs,height:qs,colorDark:'#0f3d1e',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.Q});}catch(e){}
           setTimeout(function(){
             var qc=box.querySelector('canvas')||box.querySelector('img');
-            g.fillStyle='#ffffff';g.fillRect(qx-14,qy-14,qs+28,qs+28);
-            g.strokeStyle='#cfd8d0';g.lineWidth=2;g.strokeRect(qx-14,qy-14,qs+28,qs+28);
-            if(qc){try{g.drawImage(qc,qx,qy,qs,qs);}catch(e){}}
+            g.fillStyle='#ffffff';g.fillRect(qx-pad,qy-pad,qs+pad*2,qs+pad*2);
+            g.strokeStyle='#cfd8d0';g.lineWidth=2;g.strokeRect(qx-pad,qy-pad,qs+pad*2,qs+pad*2);
+            if(qc){g.imageSmoothingEnabled=false;try{g.drawImage(qc,qx,qy,qs,qs);}catch(e){}g.imageSmoothingEnabled=true;}
             g.fillStyle='#5c6b60';g.font='500 22px "Plus Jakarta Sans",system-ui,sans-serif';g.textAlign='center';
-            g.fillText('Pindai untuk verifikasi',qx+qs/2,qy+qs+30);g.textAlign='left';
+            g.fillText('Pindai untuk verifikasi',qx+qs/2,qy+qs+pad+8);g.textAlign='left';
             document.body.removeChild(box);finish();
           },60);
         } else finish();
