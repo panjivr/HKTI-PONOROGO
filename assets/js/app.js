@@ -133,14 +133,18 @@
         for(var yy=40;yy<H-40;yy+=28)for(var xx=24;xx<W;xx+=28){g.beginPath();g.arc(xx,yy,1.5,0,7);g.fill();}
         function bar(y0){var lg=g.createLinearGradient(0,0,W,0);lg.addColorStop(0,'#164e26');lg.addColorStop(1,'#43a047');g.fillStyle=lg;g.fillRect(0,y0,W,70);}
         bar(0);bar(H-70);
-        var px=110,py=372,pw=270,ph=330;
-        // header: LOGO di tengah, besar — judul terpusat di bawahnya
-        var lh=190,lw=(logo&&logo.width)?logo.width*(lh/logo.height):190,lx=(W-lw)/2,ly=44;
-        if(logo&&logo.width)g.drawImage(logo,lx,ly,lw,lh);
-        g.textAlign='center';g.textBaseline='alphabetic';
-        g.fillStyle='#1b241d';g.font='800 48px "Plus Jakarta Sans",system-ui,sans-serif';g.fillText('KARTU TANDA ANGGOTA',W/2,ly+lh+46);
-        g.fillStyle='#3a3f3a';g.font='500 30px "Plus Jakarta Sans",system-ui,sans-serif';g.fillText('HIMPUNAN KERUKUNAN TANI INDONESIA',W/2,ly+lh+86);
-        g.textAlign='left';
+        var px=110,py=300,pw=280,ph=350;
+        // header: logo besar di KIRI + judul di kanan (layout seperti contoh)
+        var lh=176,lw=(logo&&logo.width)?logo.width*(lh/logo.height):176;
+        var t1='KARTU TANDA ANGGOTA',t2='HIMPUNAN KERUKUNAN TANI INDONESIA';
+        g.textAlign='left';g.textBaseline='alphabetic';
+        g.font='800 50px "Plus Jakarta Sans",system-ui,sans-serif';var w1=g.measureText(t1).width;
+        g.font='500 31px "Plus Jakarta Sans",system-ui,sans-serif';var w2=g.measureText(t2).width;
+        var gap=32,total=lw+gap+Math.max(w1,w2),sx=(W-total)/2,cy=158;
+        if(logo&&logo.width)g.drawImage(logo,sx,cy-lh/2,lw,lh);
+        var tx=sx+lw+gap;
+        g.fillStyle='#1b241d';g.font='800 50px "Plus Jakarta Sans",system-ui,sans-serif';g.fillText(t1,tx,cy-2);
+        g.fillStyle='#3a3f3a';g.font='500 31px "Plus Jakarta Sans",system-ui,sans-serif';g.fillText(t2,tx,cy+38);
         // foto
         if(photo&&photo.width){var s=Math.max(pw/photo.width,ph/photo.height),dw=photo.width*s,dh=photo.height*s;
           g.save();g.beginPath();g.rect(px,py,pw,ph);g.clip();g.drawImage(photo,px+(pw-dw)/2,py+(ph-dh)/2,dw,dh);g.restore();
@@ -148,7 +152,7 @@
         g.strokeStyle='#cfd8d0';g.lineWidth=2;g.strokeRect(px,py,pw,ph);
         // data
         var rows=[['No. ID',m.nia],['Nama',m.nama],['Alamat',(m.alamat&&m.alamat!=='-')?m.alamat:'-'],['Desa/Kelurahan',m.desa||'-'],['Kecamatan',m.kecamatan||'-'],['Kota/Kab','Kab. Ponorogo'],['Provinsi','Jawa Timur']];
-        var bx=470,cx=bx+278,vx=bx+312,vy=398,rh=48,vmax=W-vx-40;g.textBaseline='alphabetic';
+        var bx=470,cx=bx+278,vx=bx+312,vy=326,rh=48,vmax=W-vx-40;g.textBaseline='alphabetic';
         for(var i=0;i<rows.length;i++){var y=vy+i*rh;
           g.fillStyle='#1b241d';g.font='400 31px "Plus Jakarta Sans",system-ui,sans-serif';
           g.fillText(rows[i][0],bx,y);g.fillText(':',cx,y);
