@@ -424,39 +424,83 @@ window.HKTI_MEMBERS = [
 
 window.HKTI_NEWS = [
  {
+  "judul": "HKTI Ponorogo Gaspol Swasembada! Rakercab 2026–2030 Fokus Pangkas Tengkulak",
+  "tanggal": "9 Agustus 2026",
+  "kategori": "HKTI Ponorogo",
+  "ringkas": "DPC HKTI Kabupaten Ponorogo menggelar Rapat Kerja Cabang periode 2026–2030 di Ngebel dengan tema “Petani Berdaya, Pangan Mandiri, Ekonomi Desa Tumbuh” — mendorong petani langsung ke pasar dan memangkas peran tengkulak.",
+  "link": "https://www.sinyalponorogo.com/2026/08/hkti-ponorogo-gaspol-swasembada.html",
+  "gambar": "https://hkti.org/wp-content/uploads/2023/07/Setiawan-Wangsaatmaja-Buka-Rakerda-DPD-HKTI-780x470-1-jpeg.webp"
+ },
+ {
+  "judul": "HKTI Ponorogo Gas Pol! Demplot 5 Hektar Kedelai di Manuk Siman Jadi Awal Swasembada",
+  "tanggal": "Juli 2026",
+  "kategori": "HKTI Ponorogo",
+  "ringkas": "HKTI Ponorogo memulai demonstration plot (demplot) kedelai seluas 5 hektar di Manuk, Siman, memakai benih unggul untuk menjamin mutu dan produktivitas — menyasar kebutuhan lokal hingga peluang ekspor.",
+  "link": "https://www.sinyalponorogo.com/2026/07/hkti-ponorogo-gas-pol-demplot-5-hektar.html",
+  "gambar": "https://hkti.org/wp-content/uploads/2023/08/editlumbungpadi.webp"
+ },
+ {
+  "judul": "MBG di Ponorogo Serap Ribuan Tenaga Kerja dan Hidupkan Ekonomi Warga",
+  "tanggal": "Juni 2026",
+  "kategori": "HKTI Ponorogo",
+  "ringkas": "HKTI Ponorogo memetakan kolaborasi petani, peternak, dan dapur program Makan Bergizi Gratis (MBG) — menjadi jembatan agar hasil tani terserap pasar dan ekonomi desa tumbuh.",
+  "link": "https://www.sinyalponorogo.com/2026/06/bukan-sekadar-dapur-mbg-di-ponorogo.html",
+  "gambar": "https://hkti.org/wp-content/uploads/2023/06/IMG-20230622-WA0076.webp"
+ },
+ {
+  "judul": "Wamentan Kukuhkan Pengurus HKTI Jatim 2026–2031, Dorong Kolaborasi Sejahterakan Petani",
+  "tanggal": "2026",
+  "kategori": "HKTI Jawa Timur",
+  "ringkas": "Wakil Menteri Pertanian mengukuhkan pengurus HKTI Jawa Timur periode 2026–2031, mendorong kolaborasi lintas pihak untuk meningkatkan kesejahteraan petani — termasuk di kabupaten seperti Ponorogo.",
+  "link": "https://beritajatim.com/wamentan-kukuhkan-pengurus-hkti-jatim-2026-2031-dorong-kolaborasi-tingkatkan-kesejahteraan-petani",
+  "gambar": "https://hkti.org/wp-content/uploads/2023/07/20230714-Pelantikan-pengurus-DPC-Pertani-HKTI-Belitung.jpg"
+ },
+ {
   "judul": "Program HKTI Saba Desa, Bantu Atasi Kelangkaan Pupuk",
   "tanggal": "12 Januari 2024",
-  "ringkas": "sumber berita : HKTI Gulirkan Program Saba Desa, Bantu Petani Kuningan Atasi Kelangkaan Pupuk - Ciremai Today Ciremaitoday.com, Kuningan – Himpunan Kerukunan Tani Indonesia (HKTI) ",
-  "link": "https://hkti.org/program-hkti-saba-desa-bantu-atasi-kelangkaan-pupuk/"
+  "kategori": "Berita",
+  "ringkas": "HKTI menggulirkan Program Saba Desa untuk membantu petani mengatasi kelangkaan pupuk subsidi dan kenaikan harga pupuk non-subsidi.",
+  "link": "https://hkti.org/program-hkti-saba-desa-bantu-atasi-kelangkaan-pupuk/",
+  "gambar": "https://hkti.org/wp-content/uploads/2024/01/WhatsApp-Image-2024-01-13-at-06.21.47-jpeg.webp"
  },
  {
   "judul": "Resmi Dilantik, Pengurus HKTI Lampung Siap Lanjutkan Program yang Tertunda",
   "tanggal": "18 November 2023",
-  "ringkas": "sumber berita : https://lampung.rilis.id/Politika/Berita/Resmi-Dilantik-Pengurus-HKTI-Lampung-Siap-Lanjutkan-Program-yang-Tertunda-m8aDMz6 RILISID, Bandarlampung — Muchlido Aprilia",
-  "link": "https://hkti.org/resmi-dilantik-pengurus-hkti-lampung-siap-lanjutkan-program-yang-tertunda/"
+  "kategori": "Berita",
+  "ringkas": "Pengurus HKTI Lampung resmi dilantik dan menyatakan siap melanjutkan program-program pemberdayaan petani yang sempat tertunda.",
+  "link": "https://hkti.org/resmi-dilantik-pengurus-hkti-lampung-siap-lanjutkan-program-yang-tertunda/",
+  "gambar": "https://hkti.org/wp-content/uploads/2023/11/18Nh0xrWf_IMG_20231118_110232_copy_3060x1377.webp"
  },
  {
   "judul": "Ketua PAC HKTI Tiga Kecamatan di Jember Dilantik",
   "tanggal": "13 November 2023",
-  "ringkas": "sumber berita : https://lensanusantara.co.id/2023/11/13/ketua-pac-hkti-tiga-kecamatan-di-jember-dilantik/ Jember, LENSANUSANTARA.CO.ID – Ketua PAC Himpunan Kerukunan Tani Indonesia",
-  "link": "https://hkti.org/ketua-pac-hkti-tiga-kecamatan-di-jember-dilantik/"
+  "kategori": "Berita",
+  "ringkas": "Ketua Pengurus Anak Cabang (PAC) HKTI di tiga kecamatan wilayah Jember resmi dilantik untuk memperkuat organisasi di tingkat kecamatan.",
+  "link": "https://hkti.org/ketua-pac-hkti-tiga-kecamatan-di-jember-dilantik/",
+  "gambar": "https://hkti.org/wp-content/uploads/2023/11/IMG-20231113-WA0022.webp"
  },
  {
-  "judul": "HKTI KBB sebagai Jembatan Penghubung Petani dengan Pemerintah, Dunia Usaha hingga Lembaga Keuangan",
+  "judul": "HKTI KBB: Jembatan Petani dengan Pemerintah, Dunia Usaha & Lembaga Keuangan",
   "tanggal": "28 September 2023",
-  "ringkas": "sumber berita : https://www.koran-gala.id/news/58710323390/hkti-kbb-sebagai-jembatan-penghubung-petani-dengan-pemerintah-dunia-usaha-hingga-lembaga-keuangan KORAN GALA – DPC Himpun",
-  "link": "https://hkti.org/hkti-kbb-sebagai-jembatan-penghubung-petani-dengan-pemerintah-dunia-usaha-hingga-lembaga-keuangan/"
+  "kategori": "Berita",
+  "ringkas": "DPC HKTI Kabupaten Bandung Barat memposisikan diri sebagai jembatan penghubung petani dengan pemerintah, dunia usaha, hingga lembaga keuangan.",
+  "link": "https://hkti.org/hkti-kbb-sebagai-jembatan-penghubung-petani-dengan-pemerintah-dunia-usaha-hingga-lembaga-keuangan/",
+  "gambar": "https://hkti.org/wp-content/uploads/2023/09/42fed_hkti-kbb.webp"
  },
  {
-  "judul": "Terpilih Secara Aklamasi, Edi Rusyandi Jadi Ketua HKTI KBB Periode 2023-2028",
+  "judul": "Terpilih Secara Aklamasi, Edi Rusyandi Jadi Ketua HKTI KBB Periode 2023–2028",
   "tanggal": "27 September 2023",
-  "ringkas": "sumber berita : https://bandungraya.inews.id/read/350870/terpilih-secara-aklamasi-edi-rusyandi-jadi-ketua-hkti-kbb-periode-2023-2028 BANDUNG BARAT,Inews Bandungraya.Id – Musyawarah",
-  "link": "https://hkti.org/terpilih-secara-aklamasi-edi-rusyandi-jadi-ketua-hkti-kbb-periode-2023-2028/"
+  "kategori": "Berita",
+  "ringkas": "Melalui musyawarah cabang, Edi Rusyandi terpilih secara aklamasi sebagai Ketua HKTI Kabupaten Bandung Barat periode 2023–2028.",
+  "link": "https://hkti.org/terpilih-secara-aklamasi-edi-rusyandi-jadi-ketua-hkti-kbb-periode-2023-2028/",
+  "gambar": "https://hkti.org/wp-content/uploads/2023/09/IMG-20230927-WA0061-365029187.webp"
  },
  {
   "judul": "Hari Tani Nasional, HKTI Cianjur Gelar Bazar Pangan Murah",
   "tanggal": "27 September 2023",
-  "ringkas": "sumber berita : https://sumut.pikiran-rakyat.com/nusantara/pr-3387171822/hari-tani-nasional-hkti-cianjur-gelar-bazar-pangan-murah DETAKSUMUT.ID – Dalam rangka momentum Hari Tani Na",
-  "link": "https://hkti.org/hari-tani-nasional-hkti-cianjur-gelar-bazar-pangan-murah/"
+  "kategori": "Berita",
+  "ringkas": "Memperingati Hari Tani Nasional, HKTI Cianjur menggelar bazar pangan murah untuk membantu masyarakat sekaligus menyerap hasil tani.",
+  "link": "https://hkti.org/hari-tani-nasional-hkti-cianjur-gelar-bazar-pangan-murah/",
+  "gambar": "https://hkti.org/wp-content/uploads/2023/08/1WhatsApp-Image-2023-08-18-at-23.15.39.webp"
  }
 ];

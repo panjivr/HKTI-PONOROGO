@@ -29,9 +29,11 @@
 <script>
   var svg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19V5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M14 3v6h6"/></svg>';
   document.getElementById('news-grid').innerHTML=(window.HKTI_NEWS||[]).map(function(n){
+    var pon=/ponorogo/i.test(n.kategori||'');
+    var thumb=n.gambar?'<img src="'+HKTI.esc(n.gambar)+'" alt="" loading="lazy" onerror="this.remove()">':svg;
     return '<a class="card news" href="'+HKTI.esc(n.link)+'" target="_blank" rel="noopener">'+
-      '<div class="news__thumb">'+svg+'</div><div class="news__body">'+
-      '<span class="news__badge">Berita</span><h3>'+HKTI.esc(n.judul)+'</h3>'+
+      '<div class="news__thumb">'+thumb+'</div><div class="news__body">'+
+      '<span class="news__badge'+(pon?' pon':'')+'">'+HKTI.esc(n.kategori||'Berita')+'</span><h3>'+HKTI.esc(n.judul)+'</h3>'+
       '<p class="muted" style="font-size:.9rem">'+HKTI.esc(n.ringkas)+'…</p>'+
       '<time>🗓 '+HKTI.esc(n.tanggal||'2024')+'</time></div></a>';
   }).join('');
