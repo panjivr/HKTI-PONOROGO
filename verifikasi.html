@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verifikasi Kartu Anggota — HKTI Ponorogo</title>
+<meta name="description" content="Verifikasi keaslian kartu anggota HKTI Ponorogo dengan memindai QR atau memasukkan Nomor Induk Anggota.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="verifikasi.html">
+<header id="site-header"></header>
+
+<section class="page-hero"><div class="container">
+  <div class="crumb"><a href="index.html">Beranda</a> / Verifikasi Kartu</div>
+  <h1>Verifikasi Kartu Anggota</h1>
+  <p>Pindai QR pada kartu anggota atau masukkan Nomor Induk Anggota (NIA) untuk memastikan keaslian keanggotaan.</p>
+</div></section>
+
+<section class="section"><div class="container">
+  <div class="tool-wrap">
+    <!-- Input -->
+    <div class="card" id="input-panel">
+      <div class="field">
+        <label>Nomor Induk Anggota (NIA) atau ID Kartu</label>
+        <input class="input" id="id-input" placeholder="mis. 3502.24.0001 atau HKTI-PNG-0001" autocomplete="off">
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="btn-check" style="flex:1">🔎 Verifikasi</button>
+        <button class="btn btn--outline" id="btn-scan" style="flex:1">📷 Pindai QR</button>
+      </div>
+      <div class="reader-box no-print" id="reader-wrap" style="margin-top:16px;display:none">
+        <div id="qr-reader"></div>
+        <button class="btn btn--sm btn--outline btn--block" id="btn-stop" style="margin-top:10px">Tutup Kamera</button>
+      </div>
+      <p class="muted" style="font-size:.82rem;margin:12px 0 0">🔒 Data pribadi anggota hanya ditampilkan setelah verifikasi berhasil dan bersifat internal organisasi.</p>
+    </div>
+
+    <!-- Result -->
+    <div id="result" style="margin-top:26px"></div>
+  </div>
+</div></section>
+
+<footer id="site-footer"></footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+(function(){
+  var resultEl=document.getElementById('result');
+  var input=document.getElementById('id-input');
+  var scanner=null;
+
+  function parseId(text){
+    if(!text)return '';
+    text=String(text).trim();
+    var m=text.match(/[?&]id=([^&#]+)/);
+    if(m)return decodeURIComponent(m[1]);
+    return text;
+  }
+
+  function statusPill(s){
+    if(s==='verified')return '<span class="status-pill ok">✅ TERVERIFIKASI — Anggota Resmi</span>';
+    if(s==='pending')return '<span class="status-pill pend">⏳ Menunggu Aktivasi</span>';
+    return '<span class="status-pill bad">❌ Tidak Ditemukan</span>';
+  }
+
+  function card(m){
+    var jk=m.jk==='P'?'Perempuan':(m.jk==='L'?'Laki-laki':'—');
+    var qrTarget='qr-'+m.id;
+    var html=
+    '<div class="center" style="margin-bottom:16px">'+statusPill(m.status)+'</div>'+
+    '<div class="id-card" id="idcard">'+
+      '<div class="id-card__top"><span class="logo">HK</span>'+
+        '<span><b>KARTU TANDA ANGGOTA</b><br><span>HKTI KABUPATEN PONOROGO</span></span></div>'+
+      '<div class="id-card__body">'+
+        '<div>'+
+          '<div class="id-card__field"><label>Nama</label><b>'+HKTI.esc(m.nama)+'</b></div>'+
+          '<div class="id-card__field"><label>NIA</label><b class="id-card__nia">'+HKTI.esc(m.nia)+'</b></div>'+
+          '<div class="id-card__field"><label>Kecamatan</label><b>'+HKTI.esc(m.kecamatan||'—')+'</b></div>'+
+          '<div class="id-card__field"><label>Jabatan</label><b>'+HKTI.esc(m.jabatan||'Anggota')+'</b></div>'+
+        '</div>'+
+        '<div class="id-card__qr" id="'+qrTarget+'"></div>'+
+      '</div>'+
+      '<div class="id-card__foot"><span>Periode '+HKTI.esc(m.periode||'—')+'</span><span>hkti-ponorogo</span></div>'+
+    '</div>';
+
+    // detail internal (only after verify)
+    if(m.status==='verified'){
+      html+='<div class="card" style="margin-top:18px">'+
+        '<h3 style="font-size:1rem;margin-bottom:12px">📋 Data Anggota (Internal)</h3>'+
+        '<dl class="deflist">'+
+          '<div><dt>Nama Lengkap</dt><dd>'+HKTI.esc(m.nama)+'</dd></div>'+
+          '<div><dt>Jenis Kelamin</dt><dd>'+jk+'</dd></div>'+
+          '<div><dt>Tempat, Tgl Lahir</dt><dd>'+HKTI.esc(m.ttl)+'</dd></div>'+
+          '<div><dt>Alamat</dt><dd>'+HKTI.esc(m.alamat)+'</dd></div>'+
+          '<div><dt>Kecamatan</dt><dd>'+HKTI.esc(m.kecamatan||'—')+'</dd></div>'+
+          '<div><dt>Status</dt><dd><span class="tag ok">Terverifikasi</span></dd></div>'+
+        '</dl>'+
+        '<button class="btn btn--outline btn--sm no-print" style="margin-top:14px" onclick="window.print()">🖨 Cetak Kartu</button>'+
+      '</div>';
+    } else {
+      html+='<div class="notice" style="margin-top:16px">Anggota terdaftar namun keanggotaan <b>belum diaktivasi</b>. Silakan hubungi pengurus untuk melengkapi data dan penerbitan kartu.</div>';
+    }
+    resultEl.innerHTML=html;
+    // draw QR pointing to verify URL
+    new QRCode(document.getElementById(qrTarget),{text:HKTI.verifyUrl(m.id),width:100,height:100,
+      colorDark:'#0f3d1e',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+    resultEl.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+
+  function notFound(q){
+    resultEl.innerHTML='<div class="center" style="margin-bottom:12px">'+statusPill('none')+'</div>'+
+      '<div class="notice" style="border-left-color:var(--danger);background:#fbe9e7;border-color:#f5c6c0;color:#7a1610">'+
+      'Kartu dengan ID <b>'+HKTI.esc(q)+'</b> tidak ditemukan dalam basis data anggota. Pastikan NIA benar atau hubungi sekretariat HKTI Ponorogo.</div>';
+  }
+
+  function verify(q){
+    q=parseId(q);
+    if(!q){resultEl.innerHTML='';return;}
+    var m=HKTI.find(q);
+    if(m)card(m);else notFound(q);
+  }
+
+  document.getElementById('btn-check').addEventListener('click',function(){verify(input.value);});
+  input.addEventListener('keydown',function(e){if(e.key==='Enter')verify(input.value);});
+
+  // scanner
+  var wrap=document.getElementById('reader-wrap');
+  document.getElementById('btn-scan').addEventListener('click',function(){
+    wrap.style.display='block';
+    if(scanner)return;
+    scanner=new Html5Qrcode('qr-reader');
+    scanner.start({facingMode:'environment'},{fps:10,qrbox:220},function(txt){
+      var id=parseId(txt);input.value=id;stop();verify(id);
+    },function(){}).catch(function(err){
+      wrap.innerHTML='<div class="notice">Tidak dapat mengakses kamera: '+HKTI.esc(err)+'. Gunakan input NIA secara manual.</div>';
+    });
+  });
+  function stop(){ if(scanner){scanner.stop().then(function(){scanner.clear();scanner=null;wrap.style.display='none';}).catch(function(){}); } }
+  document.getElementById('btn-stop').addEventListener('click',stop);
+
+  // auto from URL
+  var qp=new URLSearchParams(location.search).get('id');
+  if(qp){input.value=qp;verify(qp);}
+})();
+</script>
+</body>
+</html>

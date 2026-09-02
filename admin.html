@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portal Admin — HKTI Ponorogo</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="admin.html">
+<header id="site-header"></header>
+
+<section class="page-hero"><div class="container">
+  <div class="crumb"><a href="index.html">Beranda</a> / Portal Admin</div>
+  <h1>Portal Admin Keanggotaan</h1>
+  <p>Kelola basis data anggota, status keanggotaan, jabatan, dan cetak kartu ber-QR.</p>
+</div></section>
+
+<!-- LOGIN -->
+<section class="section" id="login-sec"><div class="container">
+  <div class="tool-wrap">
+    <form class="card" id="login-form">
+      <div class="card__icon">🔐</div>
+      <h3>Masuk Portal Pengurus</h3>
+      <p class="muted" style="font-size:.9rem">Portal ini khusus pengurus DPC HKTI Ponorogo.</p>
+      <div class="field"><label>Kata Sandi</label><input class="input" type="password" id="pw" placeholder="Masukkan kata sandi"></div>
+      <button class="btn btn--block" type="submit">Masuk</button>
+      <div class="notice" style="margin-top:14px">Demo: kata sandi awal <b>hkti2024</b>. Pada implementasi nyata, gantilah dengan autentikasi server yang aman.</div>
+    </form>
+  </div>
+</div></section>
+
+<!-- DASHBOARD -->
+<section class="section" id="dash" style="display:none"><div class="container">
+  <!-- stats -->
+  <div class="grid g-4" id="stats" style="margin-bottom:26px"></div>
+
+  <!-- toolbar -->
+  <div class="card" style="margin-bottom:20px">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+      <div class="field" style="flex:2;min-width:180px;margin:0"><label>Cari anggota</label><input class="input" id="q" placeholder="Nama / NIA / kecamatan"></div>
+      <div class="field" style="flex:1;min-width:140px;margin:0"><label>Status</label>
+        <select class="input" id="fstatus"><option value="">Semua</option><option value="verified">Terverifikasi</option><option value="pending">Belum aktif</option></select></div>
+      <button class="btn btn--gold" id="btn-add">＋ Tambah Anggota</button>
+      <button class="btn btn--outline" id="btn-reset">↺ Reset Data Lokal</button>
+    </div>
+  </div>
+
+  <div class="table-wrap"><table class="tbl">
+    <thead><tr><th>NIA</th><th>Nama</th><th>L/P</th><th>Kecamatan</th><th>Jabatan</th><th>Status</th><th>Aksi</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table></div>
+  <p class="muted" style="font-size:.82rem;margin-top:12px">Perubahan disimpan di perangkat ini (localStorage) sebagai purwarupa. Untuk produksi, hubungkan ke basis data & API server.</p>
+</div></section>
+
+<!-- MODAL: edit/add -->
+<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(15,61,30,.55);z-index:100;padding:20px;overflow:auto">
+  <div class="card" style="max-width:520px;margin:40px auto">
+    <h3 id="modal-title">Tambah Anggota</h3>
+    <input type="hidden" id="m-id">
+    <div class="field"><label>Nama Lengkap</label><input class="input" id="m-nama"></div>
+    <div style="display:flex;gap:12px">
+      <div class="field" style="flex:1"><label>L/P</label><select class="input" id="m-jk"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div>
+      <div class="field" style="flex:2"><label>Kecamatan</label><input class="input" id="m-kec"></div>
+    </div>
+    <div class="field"><label>Tempat, Tgl Lahir</label><input class="input" id="m-ttl"></div>
+    <div class="field"><label>Alamat</label><input class="input" id="m-alamat"></div>
+    <div style="display:flex;gap:12px">
+      <div class="field" style="flex:1"><label>Jabatan</label><input class="input" id="m-jabatan" placeholder="Anggota / Ketua / ..."></div>
+      <div class="field" style="flex:1"><label>Status</label><select class="input" id="m-status"><option value="verified">Terverifikasi</option><option value="pending">Belum aktif</option></select></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn--block" id="m-save">Simpan</button>
+      <button class="btn btn--outline btn--block" id="m-cancel">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: card -->
+<div id="cardmodal" style="display:none;position:fixed;inset:0;background:rgba(15,61,30,.55);z-index:100;padding:20px;overflow:auto">
+  <div style="max-width:420px;margin:40px auto">
+    <div id="card-holder"></div>
+    <div style="display:flex;gap:10px;margin-top:16px" class="no-print">
+      <button class="btn btn--block" onclick="window.print()">🖨 Cetak</button>
+      <button class="btn btn--outline btn--block" id="c-close">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<footer id="site-footer"></footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+(function(){
+  var PW='hkti2024', LS='hkti_members_override';
+  var login=document.getElementById('login-sec'),dash=document.getElementById('dash');
+
+  // auth (session)
+  if(sessionStorage.getItem('hkti_admin')==='1')show();
+  document.getElementById('login-form').addEventListener('submit',function(e){
+    e.preventDefault();
+    if(document.getElementById('pw').value===PW){sessionStorage.setItem('hkti_admin','1');show();}
+    else alert('Kata sandi salah.');
+  });
+  function show(){login.style.display='none';dash.style.display='block';render();}
+
+  // data merge
+  function base(){return (window.HKTI_MEMBERS||[]).map(function(m){return Object.assign({},m);});}
+  function load(){
+    var ov={};try{ov=JSON.parse(localStorage.getItem(LS)||'{}');}catch(e){}
+    var list=base(),map={};list.forEach(function(m){map[m.id]=m;});
+    Object.keys(ov).forEach(function(id){map[id]=Object.assign(map[id]||{},ov[id]);});
+    return Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return a.id.localeCompare(b.id);});
+  }
+  function saveOverride(m){
+    var ov={};try{ov=JSON.parse(localStorage.getItem(LS)||'{}');}catch(e){}
+    ov[m.id]=m;localStorage.setItem(LS,JSON.stringify(ov));
+  }
+
+  function stats(list){
+    var v=list.filter(function(m){return m.status==='verified';}).length;
+    var p=list.length-v;
+    var kec=new Set(list.map(function(m){return m.kecamatan;}).filter(function(x){return x&&x!=='-';})).size;
+    var s=[['Total Anggota',list.length,'👥'],['Terverifikasi',v,'✅'],['Belum Aktif',p,'⏳'],['Kecamatan',kec,'📍']];
+    document.getElementById('stats').innerHTML=s.map(function(x){
+      return '<div class="card"><div class="card__icon">'+x[2]+'</div><b style="font-size:1.7rem;color:var(--green-800)">'+x[1]+'</b><p>'+x[0]+'</p></div>';
+    }).join('');
+  }
+
+  function render(){
+    var list=load();stats(list);
+    var q=(document.getElementById('q').value||'').toLowerCase();
+    var fs=document.getElementById('fstatus').value;
+    var rows=list.filter(function(m){
+      if(fs&&m.status!==fs)return false;
+      if(!q)return true;
+      return (m.nama+' '+m.nia+' '+m.id+' '+(m.kecamatan||'')).toLowerCase().indexOf(q)>-1;
+    }).map(function(m){
+      var tag=m.status==='verified'?'<span class="tag ok">Aktif</span>':'<span class="tag pend">Belum</span>';
+      return '<tr><td class="id-card__nia" style="font-size:.82rem">'+HKTI.esc(m.nia)+'</td><td>'+HKTI.esc(m.nama)+'</td>'+
+        '<td>'+HKTI.esc(m.jk)+'</td><td>'+HKTI.esc(m.kecamatan||'—')+'</td><td>'+HKTI.esc(m.jabatan||'Anggota')+'</td><td>'+tag+'</td>'+
+        '<td style="white-space:nowrap"><button class="btn btn--sm btn--outline" data-card="'+m.id+'">Kartu</button> '+
+        '<button class="btn btn--sm btn--outline" data-edit="'+m.id+'">Edit</button></td></tr>';
+    }).join('');
+    document.getElementById('rows').innerHTML=rows||'<tr><td colspan="7" class="muted center">Tidak ada data.</td></tr>';
+  }
+
+  document.getElementById('q').addEventListener('input',render);
+  document.getElementById('fstatus').addEventListener('change',render);
+  document.getElementById('btn-reset').addEventListener('click',function(){
+    if(confirm('Hapus semua perubahan lokal dan kembali ke data awal?')){localStorage.removeItem(LS);render();}
+  });
+
+  // modal edit/add
+  var modal=document.getElementById('modal');
+  function openEdit(m){
+    document.getElementById('modal-title').textContent=m?'Edit Anggota':'Tambah Anggota';
+    document.getElementById('m-id').value=m?m.id:'';
+    document.getElementById('m-nama').value=m?m.nama:'';
+    document.getElementById('m-jk').value=m?m.jk:'L';
+    document.getElementById('m-kec').value=m?(m.kecamatan||''):'';
+    document.getElementById('m-ttl').value=m?(m.ttl||''):'';
+    document.getElementById('m-alamat').value=m?(m.alamat||''):'';
+    document.getElementById('m-jabatan').value=m?(m.jabatan||'Anggota'):'Anggota';
+    document.getElementById('m-status').value=m?m.status:'verified';
+    modal.style.display='block';
+  }
+  document.getElementById('btn-add').addEventListener('click',function(){openEdit(null);});
+  document.getElementById('m-cancel').addEventListener('click',function(){modal.style.display='none';});
+  document.getElementById('m-save').addEventListener('click',function(){
+    var id=document.getElementById('m-id').value;
+    var list=load();
+    if(!id){ // new id
+      var max=0;list.forEach(function(m){var n=parseInt((m.id.match(/(\d+)$/)||[])[1]||0,10);if(n>max)max=n;});
+      var seq=max+1;id='HKTI-PNG-'+String(seq).padStart(4,'0');
+    }
+    var nia=id.replace('HKTI-PNG-','3502.24.');
+    var m={id:id,nia:nia,nama:document.getElementById('m-nama').value||'(Tanpa Nama)',
+      jk:document.getElementById('m-jk').value,ttl:document.getElementById('m-ttl').value||'-',
+      alamat:document.getElementById('m-alamat').value||'-',kecamatan:document.getElementById('m-kec').value||'-',
+      jabatan:document.getElementById('m-jabatan').value||'Anggota',status:document.getElementById('m-status').value,
+      periode:'2024–2029'};
+    saveOverride(m);modal.style.display='none';render();
+  });
+
+  // card modal
+  var cm=document.getElementById('cardmodal');
+  document.getElementById('c-close').addEventListener('click',function(){cm.style.display='none';});
+  function showCard(m){
+    var holder=document.getElementById('card-holder');
+    holder.innerHTML=
+    '<div class="id-card" id="idcard">'+
+      '<div class="id-card__top"><span class="logo">HK</span>'+
+        '<span><b>KARTU TANDA ANGGOTA</b><br><span>HKTI KABUPATEN PONOROGO</span></span></div>'+
+      '<div class="id-card__body"><div>'+
+        '<div class="id-card__field"><label>Nama</label><b>'+HKTI.esc(m.nama)+'</b></div>'+
+        '<div class="id-card__field"><label>NIA</label><b class="id-card__nia">'+HKTI.esc(m.nia)+'</b></div>'+
+        '<div class="id-card__field"><label>Kecamatan</label><b>'+HKTI.esc(m.kecamatan||'—')+'</b></div>'+
+        '<div class="id-card__field"><label>Jabatan</label><b>'+HKTI.esc(m.jabatan||'Anggota')+'</b></div>'+
+      '</div><div class="id-card__qr" id="qrbox"></div></div>'+
+      '<div class="id-card__foot"><span>Periode '+HKTI.esc(m.periode||'—')+'</span><span>hkti-ponorogo</span></div>'+
+    '</div>';
+    new QRCode(document.getElementById('qrbox'),{text:HKTI.verifyUrl(m.id),width:100,height:100,
+      colorDark:'#0f3d1e',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
+    cm.style.display='block';
+  }
+
+  document.getElementById('rows').addEventListener('click',function(e){
+    var c=e.target.getAttribute('data-card'),ed=e.target.getAttribute('data-edit');
+    var list=load();
+    if(c)showCard(list.find(function(m){return m.id===c;}));
+    if(ed)openEdit(list.find(function(m){return m.id===ed;}));
+  });
+})();
+</script>
+</body>
+</html>

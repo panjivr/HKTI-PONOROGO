@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Keanggotaan — HKTI Ponorogo</title>
+<meta name="description" content="Cara menjadi anggota HKTI Ponorogo, manfaat keanggotaan, dan kartu anggota digital ber-QR.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="keanggotaan.html">
+<header id="site-header"></header>
+
+<section class="page-hero"><div class="container">
+  <div class="crumb"><a href="index.html">Beranda</a> / Keanggotaan</div>
+  <h1>Keanggotaan HKTI Ponorogo</h1>
+  <p>Menjadi bagian dari keluarga besar petani Ponorogo — dengan identitas dan perlindungan yang jelas.</p>
+</div></section>
+
+<section class="section"><div class="container">
+  <div class="section-head center mx-auto"><span class="eyebrow">Manfaat</span><h2>Mengapa Menjadi Anggota?</h2></div>
+  <div class="grid g-3">
+    <div class="card"><div class="card__icon">🪪</div><h3>Kartu Anggota Digital</h3><p>Identitas resmi ber-QR yang dapat diverifikasi kapan saja oleh petugas.</p></div>
+    <div class="card"><div class="card__icon">🌾</div><h3>Akses Program</h3><p>Prioritas pendampingan sarana produksi, penyuluhan, dan bantuan pertanian.</p></div>
+    <div class="card"><div class="card__icon">⚖️</div><h3>Perlindungan Hukum</h3><p>Advokasi dan bantuan hukum bagi petani melalui LBH HKTI.</p></div>
+    <div class="card"><div class="card__icon">🤝</div><h3>Jaringan Luas</h3><p>Terhubung dengan sesama petani, mitra usaha, dan lembaga keuangan.</p></div>
+    <div class="card"><div class="card__icon">📣</div><h3>Suara Petani</h3><p>Aspirasi tersalurkan ke pemerintah melalui organisasi resmi.</p></div>
+    <div class="card"><div class="card__icon">🎓</div><h3>Pelatihan</h3><p>Kesempatan mengikuti pelatihan pertanian modern &amp; regenerasi tani muda.</p></div>
+  </div>
+</div></section>
+
+<!-- Cara kerja kartu -->
+<section class="section" style="background:var(--cream);border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="container">
+  <div class="section-head"><span class="eyebrow">Kartu Anggota</span><h2>Bagaimana Kartu Ber-QR Bekerja?</h2></div>
+  <div class="grid g-4">
+    <div class="card"><div class="card__icon">1️⃣</div><h3>Daftar</h3><p>Isi formulir keanggotaan di sekretariat / PAC kecamatan.</p></div>
+    <div class="card"><div class="card__icon">2️⃣</div><h3>Verifikasi Data</h3><p>Pengurus memvalidasi data dan menetapkan Nomor Induk Anggota (NIA).</p></div>
+    <div class="card"><div class="card__icon">3️⃣</div><h3>Terima Kartu</h3><p>Anda menerima kartu anggota ber-QR (cetak/digital).</p></div>
+    <div class="card"><div class="card__icon">4️⃣</div><h3>Pindai &amp; Verifikasi</h3><p>Petugas memindai QR untuk menampilkan status &amp; data keanggotaan.</p></div>
+  </div>
+  <div class="notice green" style="margin-top:24px">🔒 <b>Privasi data:</b> Data pribadi anggota (alamat, tanggal lahir, dsb.) <b>tidak ditampilkan ke publik</b>. Data hanya muncul saat kartu diverifikasi melalui pemindaian QR oleh petugas berwenang.</div>
+</div></section>
+
+<!-- Daftar -->
+<section class="section" id="daftar"><div class="container">
+  <div class="grid g-2" style="gap:40px;align-items:start">
+    <div>
+      <span class="eyebrow">Pendaftaran</span>
+      <h2>Formulir Pendaftaran Anggota</h2>
+      <p class="muted">Lengkapi data berikut. Setelah dikirim, data Anda akan ditinjau oleh pengurus DPC HKTI Ponorogo untuk penerbitan Nomor Induk Anggota dan kartu.</p>
+      <div class="notice">✉️ Formulir ini bersifat contoh (demo). Data dikirim melalui email ke sekretariat dan diverifikasi manual oleh pengurus.</div>
+    </div>
+    <form class="card" id="reg-form">
+      <div class="field"><label>Nama Lengkap</label><input class="input" name="nama" required placeholder="Nama sesuai KTP"></div>
+      <div class="field"><label>Jenis Kelamin</label><select class="input" name="jk"><option>Laki-laki</option><option>Perempuan</option></select></div>
+      <div class="field"><label>Tempat, Tanggal Lahir</label><input class="input" name="ttl" placeholder="mis. Ponorogo, 1 Januari 1980"></div>
+      <div class="field"><label>Kecamatan</label><input class="input" name="kec" placeholder="mis. Sukorejo"></div>
+      <div class="field"><label>Alamat Lengkap</label><input class="input" name="alamat" placeholder="Dukuh/Jalan, RT/RW, Kelurahan"></div>
+      <div class="field"><label>No. HP / WhatsApp</label><input class="input" name="hp" placeholder="08xxxxxxxxxx"></div>
+      <button class="btn btn--gold btn--block" type="submit">Kirim Pendaftaran</button>
+    </form>
+  </div>
+</div></section>
+
+<footer id="site-footer"></footer>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+  document.getElementById('reg-form').addEventListener('submit',function(e){
+    e.preventDefault();var f=e.target;
+    var body=['Nama: '+f.nama.value,'Jenis Kelamin: '+f.jk.value,'TTL: '+f.ttl.value,
+      'Kecamatan: '+f.kec.value,'Alamat: '+f.alamat.value,'No. HP: '+f.hp.value].join('%0D%0A');
+    window.location.href='mailto:mediacenterhkti@gmail.com?subject='+encodeURIComponent('Pendaftaran Anggota HKTI Ponorogo - '+f.nama.value)+'&body='+body;
+  });
+</script>
+</body>
+</html>

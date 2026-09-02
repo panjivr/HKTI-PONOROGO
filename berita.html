@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Berita — HKTI Ponorogo</title>
+<meta name="description" content="Berita dan kegiatan terbaru seputar HKTI.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="berita.html">
+<header id="site-header"></header>
+
+<section class="page-hero"><div class="container">
+  <div class="crumb"><a href="index.html">Beranda</a> / Berita</div>
+  <h1>Berita &amp; Kegiatan</h1>
+  <p>Perkembangan terbaru dari HKTI dan dunia pertanian Indonesia.</p>
+</div></section>
+
+<section class="section"><div class="container">
+  <div class="grid g-3" id="news-grid"></div>
+  <p class="muted center" style="margin-top:30px;font-size:.85rem">Sumber berita: <a href="https://hkti.org" target="_blank" rel="noopener">hkti.org</a> — kanal resmi HKTI Pusat.</p>
+</div></section>
+
+<footer id="site-footer"></footer>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+  var svg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19V5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M14 3v6h6"/></svg>';
+  document.getElementById('news-grid').innerHTML=(window.HKTI_NEWS||[]).map(function(n){
+    return '<a class="card news" href="'+HKTI.esc(n.link)+'" target="_blank" rel="noopener">'+
+      '<div class="news__thumb">'+svg+'</div><div class="news__body">'+
+      '<span class="news__badge">Berita</span><h3>'+HKTI.esc(n.judul)+'</h3>'+
+      '<p class="muted" style="font-size:.9rem">'+HKTI.esc(n.ringkas)+'…</p>'+
+      '<time>🗓 '+HKTI.esc(n.tanggal||'2024')+'</time></div></a>';
+  }).join('');
+</script>
+</body>
+</html>
