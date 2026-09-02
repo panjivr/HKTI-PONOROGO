@@ -125,6 +125,9 @@ p{margin:0 0 1rem}
 .news__badge.pon{background:var(--gold-500);color:#3a2c00}
 .news h3{font-size:1.05rem;margin:12px 0 8px}
 .news time{font-size:.8rem;color:var(--muted)}
+.news--txt{border-top:4px solid var(--green-600)}
+.news--txt .news__body{padding-top:22px}
+.news--txt .news__badge{margin-bottom:2px}
 
 /* ---------- Membership / CTA band ---------- */
 .band{background:linear-gradient(135deg,var(--green-800),var(--green-900));color:#fff;border-radius:24px;
