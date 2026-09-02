@@ -73,7 +73,12 @@
       return this.members().find(function(m){
         return m.id.toUpperCase()===id||m.nia===id||m.nia.replace(/\D/g,'')===id.replace(/\D/g,'');});},
     verifyUrl:function(id){var b=location.href.replace(/[^/]*$/,'');return b+'verifikasi.html?id='+encodeURIComponent(id);},
-    esc:function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+    esc:function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});},
+    initials:function(nama){var p=String(nama||'?').replace(/[^A-Za-z\s]/g,'').trim().split(/\s+/);
+      return ((p[0]||'?')[0]+(p.length>1?p[p.length-1][0]:'')).toUpperCase();},
+    avatar:function(m,cls){cls=cls||'';
+      if(m&&m.foto)return '<div class="avatar '+cls+'"><img src="'+this.esc(m.foto)+'" alt="'+this.esc(m.nama)+'"></div>';
+      return '<div class="avatar avatar--init '+cls+'">'+this.esc(this.initials(m&&m.nama))+'</div>';}
   };
 
   if(document.readyState!=='loading')mount();else document.addEventListener('DOMContentLoaded',mount);

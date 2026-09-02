@@ -60,6 +60,14 @@
   <div class="card" style="max-width:520px;margin:40px auto">
     <h3 id="modal-title">Tambah Anggota</h3>
     <input type="hidden" id="m-id">
+    <input type="hidden" id="m-foto">
+    <div class="field"><label>Foto Anggota</label>
+      <div style="display:flex;gap:12px;align-items:center">
+        <div id="m-foto-prev"></div>
+        <div style="flex:1"><input class="input" type="file" id="m-foto-file" accept="image/*">
+          <button type="button" class="btn btn--sm btn--outline" id="m-foto-clear" style="margin-top:6px">Hapus foto</button></div>
+      </div>
+    </div>
     <div class="field"><label>Nama Lengkap</label><input class="input" id="m-nama"></div>
     <div style="display:flex;gap:12px">
       <div class="field" style="flex:1"><label>L/P</label><select class="input" id="m-jk"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div>
@@ -166,8 +174,33 @@
     document.getElementById('m-alamat').value=m?(m.alamat||''):'';
     document.getElementById('m-jabatan').value=m?(m.jabatan||'Anggota'):'Anggota';
     document.getElementById('m-status').value=m?m.status:'verified';
+    document.getElementById('m-foto').value=m&&m.foto?m.foto:'';
+    document.getElementById('m-foto-file').value='';
+    fotoPrev({nama:m?m.nama:'', foto:m?m.foto:''});
     modal.style.display='block';
   }
+  function fotoPrev(m){document.getElementById('m-foto-prev').innerHTML=HKTI.avatar(m);}
+  document.getElementById('m-foto-clear').addEventListener('click',function(){
+    document.getElementById('m-foto').value='';document.getElementById('m-foto-file').value='';
+    fotoPrev({nama:document.getElementById('m-nama').value,foto:''});
+  });
+  document.getElementById('m-foto-file').addEventListener('change',function(e){
+    var f=e.target.files[0];if(!f)return;
+    var r=new FileReader();
+    r.onload=function(ev){
+      var img=new Image();
+      img.onload=function(){
+        var s=320,cv=document.createElement('canvas');
+        var scale=Math.min(s/img.width,s/img.height,1),w=img.width*scale,h=img.height*scale;
+        cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);
+        var data=cv.toDataURL('image/jpeg',0.8);
+        document.getElementById('m-foto').value=data;
+        fotoPrev({foto:data});
+      };
+      img.src=ev.target.result;
+    };
+    r.readAsDataURL(f);
+  });
   document.getElementById('btn-add').addEventListener('click',function(){openEdit(null);});
   document.getElementById('m-cancel').addEventListener('click',function(){modal.style.display='none';});
   document.getElementById('m-save').addEventListener('click',function(){
@@ -182,7 +215,7 @@
       jk:document.getElementById('m-jk').value,ttl:document.getElementById('m-ttl').value||'-',
       alamat:document.getElementById('m-alamat').value||'-',kecamatan:document.getElementById('m-kec').value||'-',
       jabatan:document.getElementById('m-jabatan').value||'Anggota',status:document.getElementById('m-status').value,
-      periode:'2024–2029'};
+      foto:document.getElementById('m-foto').value||'',periode:'2024–2029'};
     saveOverride(m);modal.style.display='none';render();
   });
 
@@ -196,8 +229,10 @@
       '<div class="id-card__top"><span class="logo">HK</span>'+
         '<span><b>KARTU TANDA ANGGOTA</b><br><span>HKTI KABUPATEN PONOROGO</span></span></div>'+
       '<div class="id-card__body"><div>'+
-        '<div class="id-card__field"><label>Nama</label><b>'+HKTI.esc(m.nama)+'</b></div>'+
-        '<div class="id-card__field"><label>NIA</label><b class="id-card__nia">'+HKTI.esc(m.nia)+'</b></div>'+
+        '<div class="id-card__photo">'+HKTI.avatar(m)+
+          '<div><div class="id-card__field"><label>Nama</label><b>'+HKTI.esc(m.nama)+'</b></div>'+
+          '<div class="id-card__field"><label>NIA</label><b class="id-card__nia">'+HKTI.esc(m.nia)+'</b></div></div>'+
+        '</div>'+
         '<div class="id-card__field"><label>Kecamatan</label><b>'+HKTI.esc(m.kecamatan||'—')+'</b></div>'+
         '<div class="id-card__field"><label>Jabatan</label><b>'+HKTI.esc(m.jabatan||'Anggota')+'</b></div>'+
       '</div><div class="id-card__qr" id="qrbox"></div></div>'+

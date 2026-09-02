@@ -78,8 +78,10 @@
         '<span><b>KARTU TANDA ANGGOTA</b><br><span>HKTI KABUPATEN PONOROGO</span></span></div>'+
       '<div class="id-card__body">'+
         '<div>'+
-          '<div class="id-card__field"><label>Nama</label><b>'+HKTI.esc(m.nama)+'</b></div>'+
-          '<div class="id-card__field"><label>NIA</label><b class="id-card__nia">'+HKTI.esc(m.nia)+'</b></div>'+
+          '<div class="id-card__photo">'+HKTI.avatar(m)+
+            '<div><div class="id-card__field"><label>Nama</label><b>'+HKTI.esc(m.nama)+'</b></div>'+
+            '<div class="id-card__field"><label>NIA</label><b class="id-card__nia">'+HKTI.esc(m.nia)+'</b></div></div>'+
+          '</div>'+
           '<div class="id-card__field"><label>Kecamatan</label><b>'+HKTI.esc(m.kecamatan||'—')+'</b></div>'+
           '<div class="id-card__field"><label>Jabatan</label><b>'+HKTI.esc(m.jabatan||'Anggota')+'</b></div>'+
         '</div>'+
