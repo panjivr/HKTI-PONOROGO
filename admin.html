@@ -76,6 +76,7 @@
     </div>
     <div class="field"><label>Tempat, Tgl Lahir</label><input class="input" id="m-ttl"></div>
     <div class="field"><label>Alamat</label><input class="input" id="m-alamat"></div>
+    <div class="field"><label>Desa/Kelurahan</label><input class="input" id="m-desa"></div>
     <div style="display:flex;gap:12px">
       <div class="field" style="flex:1"><label>Jabatan</label><input class="input" id="m-jabatan" placeholder="Anggota / Ketua / ..."></div>
       <div class="field" style="flex:1"><label>Status</label><select class="input" id="m-status"><option value="verified">Terverifikasi</option><option value="pending">Belum aktif</option></select></div>
@@ -173,6 +174,7 @@
     document.getElementById('m-kec').value=m?(m.kecamatan||''):'';
     document.getElementById('m-ttl').value=m?(m.ttl||''):'';
     document.getElementById('m-alamat').value=m?(m.alamat||''):'';
+    document.getElementById('m-desa').value=m?(m.desa||''):'';
     document.getElementById('m-jabatan').value=m?(m.jabatan||'Anggota'):'Anggota';
     document.getElementById('m-status').value=m?m.status:'verified';
     document.getElementById('m-foto').value=m&&m.foto?m.foto:'';
@@ -187,20 +189,11 @@
   });
   document.getElementById('m-foto-file').addEventListener('change',function(e){
     var f=e.target.files[0];if(!f)return;
-    var r=new FileReader();
-    r.onload=function(ev){
-      var img=new Image();
-      img.onload=function(){
-        var s=320,cv=document.createElement('canvas');
-        var scale=Math.min(s/img.width,s/img.height,1),w=img.width*scale,h=img.height*scale;
-        cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);
-        var data=cv.toDataURL('image/jpeg',0.8);
-        document.getElementById('m-foto').value=data;
-        fotoPrev({foto:data});
-      };
-      img.src=ev.target.result;
-    };
-    r.readAsDataURL(f);
+    HKTI.cropPhoto(f,function(data){
+      document.getElementById('m-foto').value=data;
+      fotoPrev({foto:data});
+    });
+    e.target.value='';
   });
   document.getElementById('btn-add').addEventListener('click',function(){openEdit(null);});
   document.getElementById('m-cancel').addEventListener('click',function(){modal.style.display='none';});
@@ -214,7 +207,8 @@
     var nia=id.replace('HKTI-PNG-','3502.24.');
     var m={id:id,nia:nia,nama:document.getElementById('m-nama').value||'(Tanpa Nama)',
       jk:document.getElementById('m-jk').value,ttl:document.getElementById('m-ttl').value||'-',
-      alamat:document.getElementById('m-alamat').value||'-',kecamatan:document.getElementById('m-kec').value||'-',
+      alamat:document.getElementById('m-alamat').value||'-',desa:document.getElementById('m-desa').value||'',
+      kecamatan:document.getElementById('m-kec').value||'-',
       jabatan:document.getElementById('m-jabatan').value||'Anggota',status:document.getElementById('m-status').value,
       foto:document.getElementById('m-foto').value||'',periode:'2024–2029'};
     saveOverride(m);modal.style.display='none';render();

@@ -176,7 +176,8 @@
   // ---- upload foto ----
   document.getElementById('foto-file').addEventListener('change',function(e){
     var f=e.target.files[0]; if(!f)return;
-    HKTI.resizePhoto(f,function(data){ HKTI.saveOverride({id:current.id,foto:data}); openProfile(current.id); });
+    HKTI.cropPhoto(f,function(data){ HKTI.saveOverride({id:current.id,foto:data}); openProfile(current.id); });
+    e.target.value='';
   });
 
   // ---- modals ----

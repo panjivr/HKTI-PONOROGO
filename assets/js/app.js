@@ -236,6 +236,46 @@
       ready.then(done);
     },
     downloadCardPNG:function(m){this.cardPNG(m,function(url){var a=document.createElement('a');a.href=url;a.download='KTA_'+String(m.nia||m.id).replace(/[^\w.-]/g,'')+'.png';document.body.appendChild(a);a.click();a.remove();});},
+    // Cropper foto: zoom (slider) + geser (drag), output potret 4:5 sesuai kartu
+    cropPhoto:function(file,cb){
+      var VW=270,VH=340,K=2,OW=VW*K,OH=VH*K;
+      var r=new FileReader();
+      r.onload=function(ev){var img=new Image();img.onload=function(){open(img);};img.src=ev.target.result;};
+      r.readAsDataURL(file);
+      function open(img){
+        var base=Math.max(VW/img.width,VH/img.height),z=1,s=base*z,dw=img.width*s,dh=img.height*s,dx=(VW-dw)/2,dy=(VH-dh)/2;
+        var ov=document.createElement('div');
+        ov.style.cssText='position:fixed;inset:0;background:rgba(15,61,30,.62);z-index:2000;display:flex;align-items:center;justify-content:center;padding:18px';
+        ov.innerHTML='<div style="background:#fff;border-radius:16px;padding:18px;max-width:330px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.35);font-family:\'Plus Jakarta Sans\',system-ui,sans-serif">'+
+          '<h3 style="margin:0 0 4px;font-weight:700;font-size:1.05rem;color:#123f1e">Atur Foto</h3>'+
+          '<p style="margin:0 0 12px;color:#5c6b60;font-size:.84rem">Geser foto untuk memposisikan, gunakan penggeser untuk memperbesar.</p>'+
+          '<div id="cr-vp" style="width:'+VW+'px;height:'+VH+'px;max-width:100%;margin:0 auto;border-radius:12px;overflow:hidden;position:relative;touch-action:none;cursor:grab;background:#e8f3ea;border:1px solid #cfd8d0"><canvas id="cr-cv" width="'+VW+'" height="'+VH+'" style="max-width:100%;display:block"></canvas></div>'+
+          '<div style="display:flex;align-items:center;gap:10px;margin:14px 2px 2px"><span style="font-size:.9rem">🔍</span><input id="cr-z" type="range" min="1" max="3" step="0.01" value="1" style="flex:1;accent-color:#2e7d32"></div>'+
+          '<div style="display:flex;gap:10px;margin-top:14px"><button id="cr-ok" class="btn btn--block">Gunakan Foto</button><button id="cr-x" class="btn btn--outline btn--block">Batal</button></div></div>';
+        document.body.appendChild(ov);
+        var cv=ov.querySelector('#cr-cv'),g=cv.getContext('2d'),vp=ov.querySelector('#cr-vp');
+        function clamp(){dx=dw<=VW?(VW-dw)/2:Math.min(0,Math.max(VW-dw,dx));dy=dh<=VH?(VH-dh)/2:Math.min(0,Math.max(VH-dh,dy));}
+        function draw(){s=base*z;dw=img.width*s;dh=img.height*s;clamp();g.clearRect(0,0,VW,VH);g.drawImage(img,dx,dy,dw,dh);}
+        ov.querySelector('#cr-z').addEventListener('input',function(){
+          var cx=(VW/2-dx)/dw,cy=(VH/2-dy)/dh;z=parseFloat(this.value);var ns=base*z,ndw=img.width*ns,ndh=img.height*ns;
+          dx=VW/2-cx*ndw;dy=VH/2-cy*ndh;dw=ndw;dh=ndh;draw();});
+        var drag=false,lx,ly;
+        function P(e){var t=e.touches&&e.touches[0]?e.touches[0]:e;return {x:t.clientX,y:t.clientY};}
+        function dn(e){drag=true;var p=P(e);lx=p.x;ly=p.y;vp.style.cursor='grabbing';}
+        function mv(e){if(!drag)return;var p=P(e);dx+=p.x-lx;dy+=p.y-ly;lx=p.x;ly=p.y;draw();if(e.cancelable)e.preventDefault();}
+        function up(){drag=false;vp.style.cursor='grab';}
+        vp.addEventListener('mousedown',dn);window.addEventListener('mousemove',mv);window.addEventListener('mouseup',up);
+        vp.addEventListener('touchstart',dn,{passive:false});vp.addEventListener('touchmove',mv,{passive:false});vp.addEventListener('touchend',up);
+        function bye(){window.removeEventListener('mousemove',mv);window.removeEventListener('mouseup',up);if(ov.parentNode)document.body.removeChild(ov);}
+        ov.querySelector('#cr-x').onclick=bye;
+        ov.addEventListener('mousedown',function(e){if(e.target===ov)bye();});
+        ov.querySelector('#cr-ok').onclick=function(){
+          var oc=document.createElement('canvas');oc.width=OW;oc.height=OH;
+          oc.getContext('2d').drawImage(img,dx*K,dy*K,dw*K,dh*K);
+          var data=oc.toDataURL('image/jpeg',0.86);bye();cb(data);};
+        draw();
+      }
+    },
     resizePhoto:function(file,cb){var r=new FileReader();r.onload=function(ev){var img=new Image();
       img.onload=function(){var s=360,cv=document.createElement('canvas');
         var sc=Math.min(s/img.width,s/img.height,1),w=img.width*sc,h=img.height*sc;
