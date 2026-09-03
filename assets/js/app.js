@@ -184,13 +184,27 @@
         g.strokeStyle='#cfd8d0';g.lineWidth=2;g.strokeRect(px,py,pw,ph);
         // data
         var rows=[['No. ID',m.nia],['Nama',m.nama],['Alamat',(m.alamat&&m.alamat!=='-')?m.alamat:'-'],['Desa/Kelurahan',m.desa||'-'],['Kecamatan',m.kecamatan||'-'],['Kota/Kab','Kab. Ponorogo'],['Provinsi','Jawa Timur']];
-        var bx=470,cx=bx+278,vx=bx+312,vy=326,rh=48,vmax=W-vx-40;g.textBaseline='alphabetic';
-        for(var i=0;i<rows.length;i++){var y=vy+i*rh;
+        var bx=470,cx=bx+278,vx=bx+312,y=344,lh=34,gap=13,vmax=W-vx-46;g.textBaseline='alphabetic';
+        function wrapVal(txt){txt=String(txt||'-');g.font='600 31px "Plus Jakarta Sans",system-ui,sans-serif';
+          if(g.measureText(txt).width<=vmax)return [txt];
+          var words=txt.split(' '),lines=[],cur='';
+          for(var w=0;w<words.length;w++){var t=cur?cur+' '+words[w]:words[w];
+            if(g.measureText(t).width>vmax&&cur){lines.push(cur);cur=words[w];}else cur=t;}
+          if(cur)lines.push(cur);
+          var out=[];for(var j=0;j<lines.length;j++){var ln=lines[j];
+            while(g.measureText(ln).width>vmax&&ln.length>3){var cut=ln.length;
+              while(cut>3&&g.measureText(ln.slice(0,cut)).width>vmax)cut--;
+              out.push(ln.slice(0,cut));ln=ln.slice(cut);}
+            out.push(ln);}
+          return out.slice(0,3); // maksimal 3 baris per kolom agar rapi
+        }
+        for(var i=0;i<rows.length;i++){
+          var lines=wrapVal(rows[i][1]);
           g.fillStyle='#1b241d';g.font='400 31px "Plus Jakarta Sans",system-ui,sans-serif';
           g.fillText(rows[i][0],bx,y);g.fillText(':',cx,y);
           g.font='600 31px "Plus Jakarta Sans",system-ui,sans-serif';
-          var val=String(rows[i][1]||'-');if(g.measureText(val).width>vmax){while(g.measureText(val+'…').width>vmax&&val.length>4)val=val.slice(0,-1);val+='…';}
-          g.fillText(val,vx,y);
+          for(var k=0;k<lines.length;k++)g.fillText(lines[k],vx,y+k*lh);
+          y+=lines.length*lh+gap;
         }
         // Barcode QR: payload ringkas (NIA) + EC tinggi → kotak sedikit & besar, tahan blur
         var qs=210,pad=30,qx=W-qs-82,qy=H-qs-124;
