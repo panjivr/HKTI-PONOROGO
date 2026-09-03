@@ -102,11 +102,14 @@
 
 <footer id="site-footer"></footer>
 <script src="assets/js/data.js"></script>
+<script src="assets/js/firebase-config.js"></script>
 <script src="assets/js/app.js"></script>
 <script>
-  // stats
-  var vs=(window.HKTI_MEMBERS||[]).filter(function(m){return m.status==='verified';}).length;
-  document.getElementById('stat-anggota').textContent=vs+'+';
+  // stats (ambil dari database bila aktif)
+  HKTI.ready(function(){
+    var vs=HKTI.merged().filter(function(m){return m.status==='verified';}).length;
+    document.getElementById('stat-anggota').textContent=vs+'+';
+  });
   // news cards
   var svg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19V5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M14 3v6h6"/></svg>';
   function newsCard(n){

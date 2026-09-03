@@ -125,6 +125,7 @@
 <footer id="site-footer"></footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="assets/js/data.js"></script>
+<script src="assets/js/firebase-config.js"></script>
 <script src="assets/js/app.js"></script>
 <script>
 (function(){
@@ -137,14 +138,18 @@
   // ---- login ----
   document.getElementById('login-form').addEventListener('submit',function(e){
     e.preventDefault();
-    var m=HKTI.mergedFind(document.getElementById('lg-id').value);
-    var pw=document.getElementById('lg-pw').value.trim();
-    if(!m){alert('NIA tidak ditemukan dalam basis data anggota.');return;}
+    var idv=document.getElementById('lg-id').value, pw=document.getElementById('lg-pw').value.trim();
     if(!pw){alert('Masukkan kata sandi.');return;}
-    var store=pwStore();
-    if(store[m.id]===undefined){ setPw(m.id,pw); }        // first login sets password
-    else if(store[m.id]!==pw){ alert('Kata sandi salah.'); return; }
-    sessionStorage.setItem(SESS,m.id); openProfile(m.id);
+    var btn=e.target.querySelector('button[type=submit]');if(btn){btn.disabled=true;btn.textContent='Memuat…';}
+    HKTI.ready(function(){
+      if(btn){btn.disabled=false;btn.textContent='Masuk';}
+      var m=HKTI.mergedFind(idv);
+      if(!m){alert('NIA tidak ditemukan dalam basis data anggota.');return;}
+      var store=pwStore();
+      if(store[m.id]===undefined){ setPw(m.id,pw); }        // first login sets password
+      else if(store[m.id]!==pw){ alert('Kata sandi salah.'); return; }
+      sessionStorage.setItem(SESS,m.id); openProfile(m.id);
+    });
   });
 
   function openProfile(id){
@@ -154,7 +159,7 @@
   }
   function logout(){sessionStorage.removeItem(SESS);profSec.style.display='none';loginSec.style.display='block';}
   document.getElementById('btn-logout').onclick=logout;
-  document.getElementById('btn-refresh').onclick=function(){openProfile(current.id);};
+  document.getElementById('btn-refresh').onclick=function(){HKTI.reload(function(){openProfile(current.id);});};
 
   function render(){
     var m=current;
@@ -229,8 +234,8 @@
     closeAll();alert('Kata sandi berhasil diperbarui.');
   };
 
-  // resume session
-  var sid=sessionStorage.getItem(SESS); if(sid)openProfile(sid);
+  // resume session (muat data dari database dulu)
+  var sid=sessionStorage.getItem(SESS); if(sid)HKTI.ready(function(){openProfile(sid);});
 })();
 </script>
 </body>

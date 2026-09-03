@@ -47,6 +47,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 <script src="assets/js/data.js"></script>
+<script src="assets/js/firebase-config.js"></script>
 <script src="assets/js/app.js"></script>
 <script>
 (function(){
@@ -105,8 +106,8 @@
   function verify(q){
     q=parseId(q);
     if(!q){resultEl.innerHTML='';return;}
-    var m=HKTI.mergedFind(q);
-    if(m)card(m);else notFound(q);
+    resultEl.innerHTML='<div class="muted center" style="padding:16px">Memeriksa…</div>';
+    HKTI.ready(function(){var m=HKTI.mergedFind(q);if(m)card(m);else notFound(q);});
   }
 
   document.getElementById('btn-check').addEventListener('click',function(){verify(input.value);});

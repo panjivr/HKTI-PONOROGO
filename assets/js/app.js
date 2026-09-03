@@ -115,10 +115,40 @@
         '<button class="btn btn--outline btn--sm" onclick="window.print()">🖨 Cetak</button></div>';},
     drawKtaQR:function(suffix,id){var el=document.getElementById('ktaqr-'+suffix);
       if(el&&window.QRCode){el.innerHTML='';new QRCode(el,{text:this.verifyUrl(id),width:60,height:60,colorDark:'#0f3d1e',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});}},
-    // ---- shared member overrides (self-service edits + admin) ----
+    // ---- Penyimpanan data anggota: Firestore (lintas perangkat) + localStorage (fallback) ----
     LS_KEY:'hkti_members_override',
-    overrides:function(){try{return JSON.parse(localStorage.getItem(this.LS_KEY)||'{}');}catch(e){return {};}},
-    saveOverride:function(m){var o=this.overrides();o[m.id]=Object.assign(o[m.id]||{},m);localStorage.setItem(this.LS_KEY,JSON.stringify(o));},
+    _cache:null,_ready:false,_loading:false,_cbs:[],FB:null,
+    dbActive:function(){return !!this.FB;},
+    _ls:function(){try{return JSON.parse(localStorage.getItem(this.LS_KEY)||'{}');}catch(e){return {};}},
+    _saveLs:function(o){try{localStorage.setItem(this.LS_KEY,JSON.stringify(o));}catch(e){}},
+    overrides:function(){return this._cache||this._ls();},
+    // Panggil ready(cb) sebelum menampilkan data → memuat data terbaru dari database (bila aktif)
+    ready:function(cb){var self=this;if(self._ready){cb&&cb();return;}if(cb)self._cbs.push(cb);
+      if(self._loading)return;self._loading=true;
+      var c=window.FIREBASE_CONFIG;
+      if(c&&c.projectId){self._loadFB(function(ok){
+        if(ok&&self._initFB()){
+          self.FB.collection('members').get().then(function(snap){
+            var m={};snap.forEach(function(d){m[d.id]=d.data();});self._cache=m;self._saveLs(m);self._finish();
+          }).catch(function(e){console.warn('DB baca gagal, pakai lokal:',e&&e.message);self._cache=self._ls();self._finish();});
+        } else {self._cache=self._ls();self._finish();}
+      });} else {self._cache=null;self._finish();}
+    },
+    _finish:function(){this._ready=true;var cbs=this._cbs;this._cbs=[];for(var i=0;i<cbs.length;i++){try{cbs[i]&&cbs[i]();}catch(e){}}},
+    _loadFB:function(cb){if(window.firebase&&window.firebase.firestore){cb(true);return;}
+      var b='https://www.gstatic.com/firebasejs/10.12.5/';
+      var a=document.createElement('script');a.src=b+'firebase-app-compat.js';
+      a.onload=function(){var d=document.createElement('script');d.src=b+'firebase-firestore-compat.js';
+        d.onload=function(){cb(true);};d.onerror=function(){cb(false);};document.head.appendChild(d);};
+      a.onerror=function(){cb(false);};document.head.appendChild(a);},
+    _initFB:function(){try{var c=window.FIREBASE_CONFIG;if(!window.firebase||!c||!c.projectId)return false;
+      if(!firebase.apps.length)firebase.initializeApp(c);this.FB=firebase.firestore();return true;}catch(e){return false;}},
+    reload:function(cb){this._ready=false;this._loading=false;this._cache=null;this.ready(cb);},
+    saveOverride:function(m){
+      var o=this.overrides();o[m.id]=Object.assign(o[m.id]||{},m);if(this._cache)this._cache=o;
+      var ls=this._ls();ls[m.id]=Object.assign(ls[m.id]||{},m);this._saveLs(ls);
+      if(this.FB){try{this.FB.collection('members').doc(m.id).set(m,{merge:true}).catch(function(e){console.warn('DB simpan gagal:',e&&e.message);});}catch(e){}}
+      return true;},
     merged:function(){var o=this.overrides(),map={};this.members().forEach(function(m){map[m.id]=Object.assign({},m);});
       Object.keys(o).forEach(function(id){map[id]=Object.assign(map[id]||{},o[id]);});
       return Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return a.id.localeCompare(b.id);});},
