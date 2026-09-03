@@ -86,6 +86,16 @@
     verifyUrl:function(id){var b=location.href.replace(/[^/]*$/,'');return b+'verifikasi.html?id='+encodeURIComponent(id);},
     // Payload QR ringkas (cuma NIA) → sedikit kotak, tahan blur; dibaca "Pindai QR" di verifikasi
     qrText:function(m){var d=String((m&&m.nia)||'').replace(/\D/g,'');return d||String((m&&m.id)||'');},
+    // Cocokkan nama anggota dengan Susunan Pengurus DPC (SK) → jabatan resmi
+    _normNama:function(s){s=String(s||'').split(',')[0].toLowerCase().replace(/[^a-z\s]/g,' ');
+      var stop={h:1,hj:1,hi:1,ir:1,dr:1,drs:1};
+      return s.split(/\s+/).filter(function(t){return t&&!stop[t];}).join(' ');},
+    _jmap:null,
+    jabatanOf:function(m){
+      if(!this._jmap){this._jmap={};var P=window.HKTI_PENGURUS||[];
+        for(var i=0;i<P.length;i++){var k=this._normNama(P[i][1]);if(k&&!this._jmap[k])this._jmap[k]=P[i][0];}}
+      var j=this._jmap[this._normNama(m&&m.nama)];
+      return j||((m&&m.jabatan&&m.jabatan!=='-')?m.jabatan:'Anggota');},
     esc:function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});},
     initials:function(nama){var p=String(nama||'?').replace(/[^A-Za-z\s]/g,'').trim().split(/\s+/);
       return ((p[0]||'?')[0]+(p.length>1?p[p.length-1][0]:'')).toUpperCase();},
@@ -104,6 +114,7 @@
             '<dl class="kta__rows">'+
               '<div><dt>No. ID</dt><dd>'+this.esc(m.nia)+'</dd></div>'+
               '<div><dt>Nama</dt><dd>'+this.esc(m.nama)+'</dd></div>'+
+              '<div><dt>Jabatan</dt><dd>'+this.esc(this.jabatanOf(m))+'</dd></div>'+
               '<div><dt>Kecamatan</dt><dd>'+this.esc(m.kecamatan||'-')+'</dd></div>'+
               '<div><dt>Kab/Kota</dt><dd>Kab. Ponorogo</dd></div>'+
               '<div><dt>Provinsi</dt><dd>Jawa Timur</dd></div>'+

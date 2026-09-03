@@ -77,15 +77,25 @@
 
     // detail internal (only after verify)
     if(m.status==='verified'){
+      var jab=HKTI.jabatanOf(m);
+      function row(dt,dd){dd=(dd==null||dd===''||dd==='-')?'—':dd;return '<div><dt>'+dt+'</dt><dd>'+HKTI.esc(dd)+'</dd></div>';}
       html+='<div class="card" style="margin-top:18px">'+
-        '<h3 style="font-size:1rem;margin-bottom:12px">📋 Data Anggota (Internal)</h3>'+
+        '<h3 style="font-size:1rem;margin-bottom:4px">📋 Data Anggota (Internal)</h3>'+
+        '<p class="muted" style="font-size:.82rem;margin-bottom:14px">Informasi resmi keanggotaan HKTI DPC Ponorogo.</p>'+
         '<dl class="deflist">'+
-          '<div><dt>Nama Lengkap</dt><dd>'+HKTI.esc(m.nama)+'</dd></div>'+
-          '<div><dt>Jenis Kelamin</dt><dd>'+jk+'</dd></div>'+
-          '<div><dt>Tempat, Tgl Lahir</dt><dd>'+HKTI.esc(m.ttl)+'</dd></div>'+
-          '<div><dt>Alamat</dt><dd>'+HKTI.esc(m.alamat)+'</dd></div>'+
-          '<div><dt>Kecamatan</dt><dd>'+HKTI.esc(m.kecamatan||'—')+'</dd></div>'+
-          '<div><dt>Status</dt><dd><span class="tag ok">Terverifikasi</span></dd></div>'+
+          row('Nama Lengkap',m.nama)+
+          row('Nomor Induk Anggota',m.nia)+
+          row('No. ID Kartu',m.id)+
+          row('Jabatan',jab)+
+          row('Jenis Kelamin',jk)+
+          row('Tempat, Tgl Lahir',m.ttl)+
+          row('Alamat',m.alamat)+
+          (m.desa?row('Desa/Kelurahan',m.desa):'')+
+          row('Kecamatan',m.kecamatan)+
+          row('Kabupaten/Kota','Kab. Ponorogo')+
+          row('Provinsi','Jawa Timur')+
+          row('Masa Bakti',m.periode)+
+          '<div><dt>Status</dt><dd><span class="tag ok">Terverifikasi — Anggota Resmi</span></dd></div>'+
         '</dl>'+
         '<button class="btn btn--outline btn--sm no-print" style="margin-top:14px" onclick="window.print()">🖨 Cetak Kartu</button>'+
       '</div>';
