@@ -228,13 +228,54 @@
         if(photo&&photo.width){var px=104,py=360,pw=272,ph=360;
           var s=Math.max(pw/photo.width,ph/photo.height),dw=photo.width*s,dh=photo.height*s;
           g.save();rr(px,py,pw,ph,20);g.clip();g.drawImage(photo,px+(pw-dw)/2,py+(ph-dh)/2,dw,dh);g.restore();}
-        // ---- DATA anggota di atas pil (layout tetap; label sudah tercetak di template) ----
-        var vals=[m.nia,m.nama,(m.alamat&&m.alamat!=='-')?m.alamat:'-',m.desa||'-',m.kecamatan||'-','Kab. Ponorogo','Jawa Timur'];
-        var cys=[455,509,562,616,670,723,776],vx=726,vmax=1132-726;
-        for(var i=0;i<vals.length;i++){
-          if(i===2)fitMulti(vals[i],vx,cys[i],vmax,2); // Alamat: auto-wrap s/d 2 baris
-          else fit(vals[i],vx,cys[i],vmax);
-        }
+        // ===== DATA anggota — ENGINE DINAMIS =====
+        // Label/pil bawaan tercetak di template pada posisi TETAP → tidak bisa
+        // memuat Alamat 3 baris. Solusi akar: tutup kolom data dgn panel putih
+        // (area ini memang sudah putih), lalu gambar ulang seluruh baris secara
+        // dinamis. Baris Alamat tingginya OTOMATIS & mendorong baris di bawahnya.
+        (function(){
+          var oCys=[455,509,562,616,670,723,776]; // posisi ikon asli (utk di-blit)
+          var rows=[['No. ID',m.nia],['Nama',m.nama],
+            ['Alamat',(m.alamat&&m.alamat!=='-')?m.alamat:'-'],
+            ['Desa/Kel.',m.desa||'-'],['Kecamatan',m.kecamatan||'-'],
+            ['Kota/Kab.','Kab. Ponorogo'],['Provinsi','Jawa Timur']];
+          var n=rows.length,ai=2;
+          // panel putih menutup baris bawaan template
+          g.save();rr(430,424,720,372,26);g.fillStyle='#ffffff';g.fill();g.restore();
+          var xIcon=467,xLabel=511,xColon=684,xVal=722,pillL=701,pillR=1147,valMaxW=pillR-18-xVal;
+          var topY=436,botY=786,availH=botY-topY;
+          // Alamat: cari font terbesar (30→20) yang muat ≤3 baris; ellipsis pilihan akhir
+          var aFont=30,aLines;
+          for(;aFont>=20;aFont-=2){g.font='700 '+aFont+'px "Plus Jakarta Sans",system-ui,sans-serif';
+            aLines=wrapAt(rows[ai][1],valMaxW);if(aLines.length<=3)break;}
+          if(aLines.length>3){aLines=aLines.slice(0,3);var lt=aLines[2];
+            while(lt.length>1&&g.measureText(lt+'…').width>valMaxW)lt=lt.slice(0,-1);aLines[2]=lt+'…';}
+          var aLh=Math.round(aFont*1.14);
+          // tinggi tiap baris (Alamat = tinggi dinamis)
+          var hs=[],sumH=0;for(var i=0;i<n;i++){hs[i]=(i===ai)?Math.max(46,aLines.length*aLh+16):46;sumH+=hs[i];}
+          var gap=(availH-sumH)/(n+1);
+          if(gap<4){var sc=(availH-4*(n+1))/sumH;for(i=0;i<n;i++)hs[i]*=sc;gap=4;}
+          // render baris
+          var y=topY+gap;
+          for(i=0;i<n;i++){
+            var h=hs[i],yc=y+h/2;
+            var ph=(i===ai)?h-10:38;                       // tinggi pil
+            g.fillStyle='#eef3ef';rr(pillL,yc-ph/2,pillR-pillL,ph,16);g.fill(); // pil nilai
+            var ih=Math.min(46,h-4);                        // ikon (blit dari template)
+            if(bg&&bg.width){try{g.drawImage(bg,445,oCys[i]-25,48,50,xIcon-ih/2,yc-ih/2,ih,ih*50/48);}catch(e){}}
+            g.fillStyle='#17492a';g.textAlign='left';g.textBaseline='middle';
+            var lsz=27;g.font='600 27px "Plus Jakarta Sans",system-ui,sans-serif';
+            while(lsz>20&&g.measureText(rows[i][0]).width>xColon-8-xLabel){lsz--;g.font='600 '+lsz+'px "Plus Jakarta Sans",system-ui,sans-serif';}
+            g.fillText(rows[i][0],xLabel,yc);
+            g.font='600 27px "Plus Jakarta Sans",system-ui,sans-serif';g.fillText(':',xColon,yc); // label + titik dua
+            if(i===ai){                                     // Alamat: multi-baris
+              g.fillStyle='#15321d';g.font='700 '+aFont+'px "Plus Jakarta Sans",system-ui,sans-serif';
+              var y0=yc-(aLines.length-1)*aLh/2;
+              for(var k=0;k<aLines.length;k++)g.fillText(aLines[k],xVal,y0+k*aLh);
+            }else fit(rows[i][1],xVal,yc,valMaxW);           // nilai 1 baris (auto-shrink)
+            y+=h+gap;
+          }
+        })();
         // ---- QR: panel putih (quiet-zone) + QR 1:1, EC tinggi, menutup placeholder ----
         function finish(){cb(c.toDataURL('image/png'));}
         var qsz=186,qcx=1287,qcy=506,qpad=22,pnl=qsz+qpad*2,pnx=qcx-pnl/2,pny=qcy-pnl/2;
