@@ -196,6 +196,31 @@
         if(g.measureText(txt).width>maxW){while(txt.length>2&&g.measureText(txt+'…').width>maxW)txt=txt.slice(0,-1);txt+='…';}
         g.fillStyle='#15321d';g.textAlign='left';g.textBaseline='middle';g.fillText(txt,x,cy);
       }
+      function wrapAt(txt,maxW){ // pecah per kata; kata sangat panjang dipecah paksa
+        var words=String(txt).split(/\s+/),lines=[],cur='';
+        for(var w=0;w<words.length;w++){var t=cur?cur+' '+words[w]:words[w];
+          if(g.measureText(t).width>maxW&&cur){lines.push(cur);cur=words[w];}else cur=t;}
+        if(cur)lines.push(cur);
+        var out=[];for(var j=0;j<lines.length;j++){var ln=lines[j];
+          while(g.measureText(ln).width>maxW&&ln.length>2){var k=ln.length;
+            while(k>2&&g.measureText(ln.slice(0,k)).width>maxW)k--;out.push(ln.slice(0,k));ln=ln.slice(k);}
+          out.push(ln);}
+        return out;
+      }
+      // Nilai multi-baris (mis. Alamat): prioritas wrap → kecilkan font → ellipsis.
+      // Rapi di dalam band barisnya (tidak menggeser label template yang sudah tercetak).
+      function fitMulti(txt,x,cy,maxW,maxLines){
+        txt=String((txt==null||txt===''||txt==='-')?'-':txt);
+        var sz=31,lines;
+        for(;sz>=21;sz--){g.font='700 '+sz+'px "Plus Jakarta Sans",system-ui,sans-serif';
+          lines=wrapAt(txt,maxW);if(lines.length<=maxLines)break;}
+        if(lines.length>maxLines){lines=lines.slice(0,maxLines);
+          var last=lines[maxLines-1];while(last.length>1&&g.measureText(last+'…').width>maxW)last=last.slice(0,-1);
+          lines[maxLines-1]=last+'…';}
+        var lh=Math.round(sz*1.12),y0=cy-(lines.length-1)*lh/2;
+        g.fillStyle='#15321d';g.textAlign='left';g.textBaseline='middle';
+        for(var i=0;i<lines.length;i++)g.fillText(lines[i],x,y0+i*lh);
+      }
       function paint(){
         g.clearRect(0,0,W,H);
         if(bg&&bg.width)g.drawImage(bg,0,0,W,H);else{g.fillStyle='#0f3d1e';g.fillRect(0,0,W,H);}
@@ -203,27 +228,26 @@
         if(photo&&photo.width){var px=104,py=360,pw=272,ph=360;
           var s=Math.max(pw/photo.width,ph/photo.height),dw=photo.width*s,dh=photo.height*s;
           g.save();rr(px,py,pw,ph,20);g.clip();g.drawImage(photo,px+(pw-dw)/2,py+(ph-dh)/2,dw,dh);g.restore();}
-        // ---- DATA anggota di atas pil (mengikuti baris template) ----
+        // ---- DATA anggota di atas pil (layout tetap; label sudah tercetak di template) ----
         var vals=[m.nia,m.nama,(m.alamat&&m.alamat!=='-')?m.alamat:'-',m.desa||'-',m.kecamatan||'-','Kab. Ponorogo','Jawa Timur'];
         var cys=[455,509,562,616,670,723,776],vx=726,vmax=1132-726;
-        for(var i=0;i<vals.length;i++)fit(vals[i],vx,cys[i],vmax);
-        // ---- QR: warna latar disamakan dgn warna dasar kartu QR (putih) agar menyatu.
-        // Ambil beberapa titik di dalam kartu QR lalu pilih yang paling terang
-        // (warna dasar kartu), supaya tidak ada garis/seam kotak. ----
+        for(var i=0;i<vals.length;i++){
+          if(i===2)fitMulti(vals[i],vx,cys[i],vmax,2); // Alamat: auto-wrap s/d 2 baris
+          else fit(vals[i],vx,cys[i],vmax);
+        }
+        // ---- QR: panel putih (quiet-zone) + QR 1:1, EC tinggi, menutup placeholder ----
         function finish(){cb(c.toDataURL('image/png'));}
-        var cardCol='#f4f6f3';
-        try{var pts=[[1180,470],[1400,470],[1180,560],[1400,560],[1285,404],[1285,628]],best=-1;
-          for(var si=0;si<pts.length;si++){var d=g.getImageData(pts[si][0],pts[si][1],1,1).data,lu=d[0]+d[1]+d[2];
-            if(lu>best){best=lu;cardCol='rgb('+d[0]+','+d[1]+','+d[2]+')';}}}catch(e){}
-        var qsz=196,qx=1287-qsz/2,qy=402; // rata tengah kartu QR (x≈1287)
+        var qsz=186,qcx=1287,qcy=506,qpad=22,pnl=qsz+qpad*2,pnx=qcx-pnl/2,pny=qcy-pnl/2;
         if(window.QRCode){
           var box=document.createElement('div');box.style.cssText='position:absolute;left:-9999px;top:0';document.body.appendChild(box);
-          try{new QRCode(box,{text:self.qrText(m),width:qsz,height:qsz,colorDark:'#0f3d1e',colorLight:cardCol,correctLevel:QRCode.CorrectLevel.M});}catch(e){}
+          try{new QRCode(box,{text:self.qrText(m),width:qsz,height:qsz,colorDark:'#0f3d1e',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.Q});}catch(e){}
           setTimeout(function(){
             var qc=box.querySelector('canvas')||box.querySelector('img');
-            // tutup placeholder QR + tulisan "QR CODE (GENERATE OTOMATIS DARI SISTEM)"
-            g.fillStyle=cardCol;rr(1166,392,242,238,16);g.fill();
-            if(qc){g.imageSmoothingEnabled=false;try{g.drawImage(qc,qx,qy,qsz,qsz);}catch(e){}g.imageSmoothingEnabled=true;}
+            // panel putih dgn bayangan halus → menutup placeholder QR + caption, sekaligus quiet-zone
+            g.save();g.shadowColor='rgba(18,50,25,.16)';g.shadowBlur=16;g.shadowOffsetY=4;
+            g.fillStyle='#ffffff';rr(pnx,pny,pnl,pnl,20);g.fill();g.restore();
+            g.strokeStyle='rgba(15,61,30,.12)';g.lineWidth=1.5;rr(pnx,pny,pnl,pnl,20);g.stroke();
+            if(qc){g.imageSmoothingEnabled=false;try{g.drawImage(qc,qcx-qsz/2,qcy-qsz/2,qsz,qsz);}catch(e){}g.imageSmoothingEnabled=true;}
             document.body.removeChild(box);finish();
           },60);
         } else finish();
