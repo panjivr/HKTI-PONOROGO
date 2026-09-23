@@ -183,82 +183,49 @@
       return Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return a.id.localeCompare(b.id);});},
     mergedFind:function(id){id=(id||'').trim().toUpperCase();return this.merged().find(function(m){
       return m.id.toUpperCase()===id||m.nia===id||m.nia.replace(/\D/g,'')===id.replace(/\D/g,'');});},
-    // Render Kartu Tanda Anggota (layout foto+data) ke PNG seukuran kartu
+    // Render Kartu Tanda Anggota: background desain (template) + foto + data + QR
+    // digambar dinamis di atasnya. Satu fungsi dipakai Preview, Unduh PNG, & Cetak
+    // agar hasil identik. Koordinat mengikuti template 1536×1024 (assets/img/kta-bg.png).
     cardPNG:function(m,cb){
-      var self=this,W=1350,H=855,c=document.createElement('canvas');c.width=W;c.height=H;
+      var self=this,W=1536,H=1024,c=document.createElement('canvas');c.width=W;c.height=H;
       var g=c.getContext('2d');
+      function rr(x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
+      function fit(txt,x,cy,maxW){ // teks satu baris, mengecil otomatis agar muat pil
+        txt=String((txt==null||txt==='')?'-':txt);var sz=32;
+        do{g.font='700 '+sz+'px "Plus Jakarta Sans",system-ui,sans-serif';if(g.measureText(txt).width<=maxW)break;sz--;}while(sz>20);
+        if(g.measureText(txt).width>maxW){while(txt.length>2&&g.measureText(txt+'…').width>maxW)txt=txt.slice(0,-1);txt+='…';}
+        g.fillStyle='#15321d';g.textAlign='left';g.textBaseline='middle';g.fillText(txt,x,cy);
+      }
       function paint(){
         g.clearRect(0,0,W,H);
-        g.fillStyle='#f3f4f1';g.fillRect(0,0,W,H);
-        g.fillStyle='rgba(20,60,30,0.04)';
-        for(var yy=40;yy<H-40;yy+=28)for(var xx=24;xx<W;xx+=28){g.beginPath();g.arc(xx,yy,1.5,0,7);g.fill();}
-        function bar(y0){var lg=g.createLinearGradient(0,0,W,0);lg.addColorStop(0,'#164e26');lg.addColorStop(1,'#43a047');g.fillStyle=lg;g.fillRect(0,y0,W,70);}
-        bar(0);bar(H-70);
-        // ===== KEPALA: logo + judul (rata tengah) =====
-        var lgh=150,lgw=(logo&&logo.width)?logo.width*(lgh/logo.height):150;
-        var t1='KARTU TANDA ANGGOTA',t2='Himpunan Kerukunan Tani Indonesia';
-        g.textAlign='left';g.textBaseline='alphabetic';
-        g.font='800 47px "Plus Jakarta Sans",system-ui,sans-serif';var w1=g.measureText(t1).width;
-        g.font='500 27px "Plus Jakarta Sans",system-ui,sans-serif';var w2=g.measureText(t2).width;
-        var hg=30,htot=lgw+hg+Math.max(w1,w2),hsx=(W-htot)/2,hcy=150;
-        if(logo&&logo.width)g.drawImage(logo,hsx,hcy-lgh/2,lgw,lgh);
-        var htx=hsx+lgw+hg;
-        g.fillStyle='#123f1e';g.font='800 47px "Plus Jakarta Sans",system-ui,sans-serif';g.fillText(t1,htx,hcy-6);
-        g.fillStyle='#3a4a3f';g.font='500 27px "Plus Jakarta Sans",system-ui,sans-serif';g.fillText(t2,htx,hcy+34);
-        g.fillStyle='#d3ddd4';g.fillRect(80,240,W-160,2);
-        // ===== FOTO (kiri) =====
-        var px=90,py=300,pw=270,ph=340;
-        if(photo&&photo.width){var s=Math.max(pw/photo.width,ph/photo.height),dw=photo.width*s,dh=photo.height*s;
-          g.save();g.beginPath();g.rect(px,py,pw,ph);g.clip();g.drawImage(photo,px+(pw-dw)/2,py+(ph-dh)/2,dw,dh);g.restore();
-        }else{g.fillStyle='#e8f3ea';g.fillRect(px,py,pw,ph);g.fillStyle='#1b5e20';g.font='800 92px system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(self.initials(m&&m.nama),px+pw/2,py+ph/2);g.textAlign='left';g.textBaseline='alphabetic';}
-        g.strokeStyle='#cfd8d0';g.lineWidth=2;g.strokeRect(px,py,pw,ph);
-        // ===== KARTU QR (kanan, rata tengah) =====
-        var qbw=280,qbx=W-qbw-70,qby=300,qbh=340,qs=196;
-        var qx=qbx+(qbw-qs)/2,qy=qby+51,qlblY=qy+qs+42,qcx=qbx+qbw/2;
-        g.fillStyle='#ffffff';g.fillRect(qbx,qby,qbw,qbh);
-        g.strokeStyle='#cfd8d0';g.lineWidth=2;g.strokeRect(qbx,qby,qbw,qbh);
-        // ===== DATA (tengah) =====
-        var rows=[['No. ID',m.nia],['Nama',m.nama],['Alamat',(m.alamat&&m.alamat!=='-')?m.alamat:'-'],['Desa/Kel.',m.desa||'-'],['Kecamatan',m.kecamatan||'-'],['Kota/Kab','Kab. Ponorogo'],['Provinsi','Jawa Timur']];
-        var bx=390,cx=bx+228,vx=bx+258,y=330,lh=33,gap=12,vmax=qbx-32-vx;g.textBaseline='alphabetic';
-        function wrapVal(txt){txt=String(txt||'-');g.font='600 30px "Plus Jakarta Sans",system-ui,sans-serif';
-          if(g.measureText(txt).width<=vmax)return [txt];
-          var words=txt.split(' '),lines=[],cur='';
-          for(var w=0;w<words.length;w++){var t=cur?cur+' '+words[w]:words[w];
-            if(g.measureText(t).width>vmax&&cur){lines.push(cur);cur=words[w];}else cur=t;}
-          if(cur)lines.push(cur);
-          var out=[];for(var j=0;j<lines.length;j++){var ln=lines[j];
-            while(g.measureText(ln).width>vmax&&ln.length>3){var cut=ln.length;
-              while(cut>3&&g.measureText(ln.slice(0,cut)).width>vmax)cut--;
-              out.push(ln.slice(0,cut));ln=ln.slice(cut);}
-            out.push(ln);}
-          return out.slice(0,3); // maksimal 3 baris per kolom agar rapi
-        }
-        for(var i=0;i<rows.length;i++){
-          var lines=wrapVal(rows[i][1]);
-          g.fillStyle='#4a564c';g.font='400 30px "Plus Jakarta Sans",system-ui,sans-serif';
-          g.fillText(rows[i][0],bx,y);g.fillText(':',cx,y);
-          g.fillStyle='#16241a';g.font='600 30px "Plus Jakarta Sans",system-ui,sans-serif';
-          for(var k=0;k<lines.length;k++)g.fillText(lines[k],vx,y+k*lh);
-          y+=lines.length*lh+gap;
-        }
-        // Barcode QR: payload ringkas (NIA) → versi 1 (21×21), kotak sedikit, tahan blur
+        if(bg&&bg.width)g.drawImage(bg,0,0,W,H);else{g.fillStyle='#0f3d1e';g.fillRect(0,0,W,H);}
+        // ---- FOTO anggota (kotak kiri). Kosong → biarkan placeholder pada template. ----
+        if(photo&&photo.width){var px=94,py=356,pw=336,ph=372;
+          var s=Math.max(pw/photo.width,ph/photo.height),dw=photo.width*s,dh=photo.height*s;
+          g.save();rr(px,py,pw,ph,18);g.clip();g.drawImage(photo,px+(pw-dw)/2,py+(ph-dh)/2,dw,dh);g.restore();}
+        // ---- DATA anggota di atas pil (mengikuti baris template) ----
+        var vals=[m.nia,m.nama,(m.alamat&&m.alamat!=='-')?m.alamat:'-',m.desa||'-',m.kecamatan||'-','Kab. Ponorogo','Jawa Timur'];
+        var cys=[455,509,562,616,670,723,776],vx=726,vmax=1132-726;
+        for(var i=0;i<vals.length;i++)fit(vals[i],vx,cys[i],vmax);
+        // ---- QR: tutup placeholder QR+caption template, lalu gambar QR asli ----
         function finish(){cb(c.toDataURL('image/png'));}
+        var qsz=210,qx=1306-qsz/2,qy=505-qsz/2; // pusat kotak QR template (≈1306,505)
         if(window.QRCode){
           var box=document.createElement('div');box.style.cssText='position:absolute;left:-9999px;top:0';document.body.appendChild(box);
-          try{new QRCode(box,{text:self.qrText(m),width:qs,height:qs,colorDark:'#0f3d1e',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){}
+          try{new QRCode(box,{text:self.qrText(m),width:qsz,height:qsz,colorDark:'#0f3d1e',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){}
           setTimeout(function(){
             var qc=box.querySelector('canvas')||box.querySelector('img');
-            if(qc){g.imageSmoothingEnabled=false;try{g.drawImage(qc,qx,qy,qs,qs);}catch(e){}g.imageSmoothingEnabled=true;}
-            g.fillStyle='#5c6b60';g.font='600 24px "Plus Jakarta Sans",system-ui,sans-serif';g.textAlign='center';
-            g.fillText('Pindai untuk verifikasi',qcx,qlblY);g.textAlign='left';
+            // masker putih menutup kotak QR & tulisan "QR CODE (GENERATE OTOMATIS…)"
+            g.fillStyle='#ffffff';rr(1188,398,236,208,16);g.fill();
+            if(qc){g.imageSmoothingEnabled=false;try{g.drawImage(qc,qx,qy,qsz,qsz);}catch(e){}g.imageSmoothingEnabled=true;}
             document.body.removeChild(box);finish();
           },60);
         } else finish();
       }
-      var logo=null,photo=null,pending=1;
+      var bg=null,photo=null,pending=1;
       function done(){if(!--pending)paint();}
-      function loadImg(src,set){pending++;var im=new Image();im.crossOrigin='anonymous';im.onload=function(){set(im);done();};im.onerror=function(){done();};im.src=src;}
-      loadImg('assets/img/logo-hkti.png',function(i){logo=i;});
+      function loadImg(src,set){pending++;var im=new Image();if(/^https?:/i.test(src))im.crossOrigin='anonymous';im.onload=function(){set(im);done();};im.onerror=function(){done();};im.src=src;}
+      loadImg('assets/img/kta-bg.png',function(i){bg=i;});
       if(m&&m.foto)loadImg(m.foto,function(i){photo=i;});
       var ready=(document.fonts&&document.fonts.ready)?document.fonts.ready:Promise.resolve();
       ready.then(done);

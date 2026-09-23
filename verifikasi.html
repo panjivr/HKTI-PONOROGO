@@ -73,7 +73,7 @@
     var jk=m.jk==='P'?'Perempuan':(m.jk==='L'?'Laki-laki':'—');
     var html=
     '<div class="center" style="margin-bottom:16px">'+statusPill(m.status)+'</div>'+
-    HKTI.ktaCard(m,'v');
+    '<div id="kta-holder" style="max-width:560px;margin:0 auto"><div class="muted center" style="padding:26px">Membuat kartu…</div></div>';
 
     // detail internal (only after verify)
     if(m.status==='verified'){
@@ -105,7 +105,8 @@
       html+='<div class="notice" style="margin-top:16px">Anggota terdaftar namun keanggotaan <b>belum diaktivasi</b>. Silakan hubungi pengurus untuk melengkapi data dan penerbitan kartu.</div>';
     }
     resultEl.innerHTML=html;
-    HKTI.drawKtaQR('v',m);
+    HKTI.cardPNG(m,function(u){var h=document.getElementById('kta-holder');
+      if(h)h.innerHTML='<img src="'+u+'" alt="Kartu Tanda Anggota" style="width:100%;display:block;border-radius:14px;box-shadow:0 8px 28px rgba(15,61,30,.18)">';});
     resultEl.scrollIntoView({behavior:'smooth',block:'nearest'});
   }
 
