@@ -183,11 +183,13 @@
       return Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return a.id.localeCompare(b.id);});},
     mergedFind:function(id){id=(id||'').trim().toUpperCase();return this.merged().find(function(m){
       return m.id.toUpperCase()===id||m.nia===id||m.nia.replace(/\D/g,'')===id.replace(/\D/g,'');});},
-    // Render Kartu Tanda Anggota: background desain (template) + foto + data + QR
-    // digambar dinamis di atasnya. Satu fungsi dipakai Preview, Unduh PNG, & Cetak
-    // agar hasil identik. Koordinat mengikuti template 1536×1024 (assets/img/kta-bg.png).
+    // Render Kartu Tanda Anggota memakai SATU master coordinate system yang sama
+    // dgn ukuran ASLI background (assets/img/kta-bg.png = 1584×993). Label, ikon,
+    // titik dua, garis SUDAH ada di background — kita hanya menempel FOTO, VALUE,
+    // dan QR pada koordinat pixel tetap. Satu fungsi → Preview = Unduh PNG = Cetak.
+    CARD_DEBUG:false, // set true utk menampilkan kotak bounding (fine-tuning posisi)
     cardPNG:function(m,cb){
-      var self=this,W=1536,H=1024,c=document.createElement('canvas');c.width=W;c.height=H;
+      var self=this,W=1584,H=993,c=document.createElement('canvas');c.width=W;c.height=H;
       var g=c.getContext('2d');
       function rr(x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
       function fit(txt,x,cy,maxW){ // teks satu baris, mengecil otomatis agar muat pil
@@ -221,77 +223,62 @@
         g.fillStyle='#15321d';g.textAlign='left';g.textBaseline='middle';
         for(var i=0;i<lines.length;i++)g.fillText(lines[i],x,y0+i*lh);
       }
+      // ==== KOORDINAT MASTER (px, pada 1584×993) — diukur dari background asli ====
+      var FOTO={x:92,y:321,w:296,h:396,r:22};          // bingkai foto (isi penuh)
+      var VALX=721, VALMAXW=1126-721;                 // kolom value: x mulai & lebar
+      var ROWY={id:435,nama:478,desa:630,kec:678,kota:730,prov:783}; // baseline garis
+      var ADDR={cy:551,top:508,bot:600};               // area Alamat (2 garis: 530 & 571)
+      var QR={cx:1332,cy:483,size:256,maskX:1198,maskY:349,maskW:304,maskH:268};
+      function dbg(x,y,w,h,col){if(!self.CARD_DEBUG)return;g.save();g.strokeStyle=col;g.lineWidth=2;g.strokeRect(x,y,w,h);g.restore();}
+      function valLine(txt,cy){ // 1 baris nilai, baseline di atas garis
+        txt=String((txt==null||txt===''||txt==='-')?'-':txt);var sz=30;
+        do{g.font='700 '+sz+'px "Plus Jakarta Sans",system-ui,sans-serif';if(g.measureText(txt).width<=VALMAXW)break;sz--;}while(sz>20);
+        if(g.measureText(txt).width>VALMAXW){while(txt.length>2&&g.measureText(txt+'…').width>VALMAXW)txt=txt.slice(0,-1);txt+='…';}
+        g.fillStyle='#123f28';g.textAlign='left';g.textBaseline='alphabetic';g.fillText(txt,VALX,cy);
+      }
       function paint(){
         g.clearRect(0,0,W,H);
         if(bg&&bg.width)g.drawImage(bg,0,0,W,H);else{g.fillStyle='#0f3d1e';g.fillRect(0,0,W,H);}
-        // ---- FOTO anggota: pas di dalam bingkai putih (tidak melebihi frame) ----
-        if(photo&&photo.width){var px=104,py=360,pw=272,ph=360;
-          var s=Math.max(pw/photo.width,ph/photo.height),dw=photo.width*s,dh=photo.height*s;
-          g.save();rr(px,py,pw,ph,20);g.clip();g.drawImage(photo,px+(pw-dw)/2,py+(ph-dh)/2,dw,dh);g.restore();}
-        // ===== DATA anggota — ENGINE DINAMIS =====
-        // Label/pil bawaan tercetak di template pada posisi TETAP → tidak bisa
-        // memuat Alamat 3 baris. Solusi akar: tutup kolom data dgn panel putih
-        // (area ini memang sudah putih), lalu gambar ulang seluruh baris secara
-        // dinamis. Baris Alamat tingginya OTOMATIS & mendorong baris di bawahnya.
+        // ---- FOTO: object-fit cover di dalam bingkai (tidak stretch/gepeng) ----
+        if(photo&&photo.width){
+          var s=Math.max(FOTO.w/photo.width,FOTO.h/photo.height),dw=photo.width*s,dh=photo.height*s;
+          g.save();rr(FOTO.x,FOTO.y,FOTO.w,FOTO.h,FOTO.r);g.clip();
+          g.drawImage(photo,FOTO.x+(FOTO.w-dw)/2,FOTO.y+(FOTO.h-dh)/2,dw,dh);g.restore();
+        }
+        dbg(FOTO.x,FOTO.y,FOTO.w,FOTO.h,'#e11');
+        // ---- VALUE data (label/ikon/titik dua/garis sudah ada di background) ----
+        valLine(m.nia,ROWY.id);          dbg(VALX,ROWY.id-30,VALMAXW,38,'#06c');
+        valLine(m.nama,ROWY.nama);       dbg(VALX,ROWY.nama-30,VALMAXW,38,'#06c');
+        valLine(m.desa,ROWY.desa);       dbg(VALX,ROWY.desa-30,VALMAXW,38,'#06c');
+        valLine(m.kecamatan,ROWY.kec);   dbg(VALX,ROWY.kec-30,VALMAXW,38,'#06c');
+        valLine('Kab. Ponorogo',ROWY.kota); dbg(VALX,ROWY.kota-30,VALMAXW,38,'#06c');
+        valLine('Jawa Timur',ROWY.prov); dbg(VALX,ROWY.prov-30,VALMAXW,38,'#06c');
+        // ---- ALAMAT: multi-baris (maks 3), kecilkan font bertahap, TANPA ellipsis dini ----
         (function(){
-          var oCys=[455,509,562,616,670,723,776]; // posisi ikon asli (utk di-blit)
-          var rows=[['No. ID',m.nia],['Nama',m.nama],
-            ['Alamat',(m.alamat&&m.alamat!=='-')?m.alamat:'-'],
-            ['Desa/Kel.',m.desa||'-'],['Kecamatan',m.kecamatan||'-'],
-            ['Kota/Kab.','Kab. Ponorogo'],['Provinsi','Jawa Timur']];
-          var n=rows.length,ai=2;
-          // panel putih menutup baris bawaan template
-          g.save();rr(430,424,720,372,26);g.fillStyle='#ffffff';g.fill();g.restore();
-          var xIcon=467,xLabel=511,xColon=684,xVal=722,pillL=701,pillR=1147,valMaxW=pillR-18-xVal;
-          var topY=436,botY=786,availH=botY-topY;
-          // Alamat: cari font terbesar (30→20) yang muat ≤3 baris; ellipsis pilihan akhir
-          var aFont=30,aLines;
-          for(;aFont>=20;aFont-=2){g.font='700 '+aFont+'px "Plus Jakarta Sans",system-ui,sans-serif';
-            aLines=wrapAt(rows[ai][1],valMaxW);if(aLines.length<=3)break;}
-          if(aLines.length>3){aLines=aLines.slice(0,3);var lt=aLines[2];
-            while(lt.length>1&&g.measureText(lt+'…').width>valMaxW)lt=lt.slice(0,-1);aLines[2]=lt+'…';}
-          var aLh=Math.round(aFont*1.14);
-          // tinggi tiap baris (Alamat = tinggi dinamis)
-          var hs=[],sumH=0;for(var i=0;i<n;i++){hs[i]=(i===ai)?Math.max(46,aLines.length*aLh+16):46;sumH+=hs[i];}
-          var gap=(availH-sumH)/(n+1);
-          if(gap<4){var sc=(availH-4*(n+1))/sumH;for(i=0;i<n;i++)hs[i]*=sc;gap=4;}
-          // render baris
-          var y=topY+gap;
-          for(i=0;i<n;i++){
-            var h=hs[i],yc=y+h/2;
-            var ph=(i===ai)?h-10:38;                       // tinggi pil
-            g.fillStyle='#eef3ef';rr(pillL,yc-ph/2,pillR-pillL,ph,16);g.fill(); // pil nilai
-            var ih=Math.min(46,h-4);                        // ikon (blit dari template)
-            if(bg&&bg.width){try{g.drawImage(bg,445,oCys[i]-25,48,50,xIcon-ih/2,yc-ih/2,ih,ih*50/48);}catch(e){}}
-            g.fillStyle='#17492a';g.textAlign='left';g.textBaseline='middle';
-            var lsz=27;g.font='600 27px "Plus Jakarta Sans",system-ui,sans-serif';
-            while(lsz>20&&g.measureText(rows[i][0]).width>xColon-8-xLabel){lsz--;g.font='600 '+lsz+'px "Plus Jakarta Sans",system-ui,sans-serif';}
-            g.fillText(rows[i][0],xLabel,yc);
-            g.font='600 27px "Plus Jakarta Sans",system-ui,sans-serif';g.fillText(':',xColon,yc); // label + titik dua
-            if(i===ai){                                     // Alamat: multi-baris
-              g.fillStyle='#15321d';g.font='700 '+aFont+'px "Plus Jakarta Sans",system-ui,sans-serif';
-              var y0=yc-(aLines.length-1)*aLh/2;
-              for(var k=0;k<aLines.length;k++)g.fillText(aLines[k],xVal,y0+k*aLh);
-            }else fit(rows[i][1],xVal,yc,valMaxW);           // nilai 1 baris (auto-shrink)
-            y+=h+gap;
-          }
+          var txt=(m.alamat&&m.alamat!=='-')?m.alamat:'-',aFont=28,lines;
+          for(;aFont>=20;aFont-=1){g.font='700 '+aFont+'px "Plus Jakarta Sans",system-ui,sans-serif';
+            lines=wrapAt(txt,VALMAXW);if(lines.length<=3)break;}
+          if(lines.length>3){lines=lines.slice(0,3);var lt=lines[2];
+            while(lt.length>1&&g.measureText(lt+'…').width>VALMAXW)lt=lt.slice(0,-1);lines[2]=lt+'…';}
+          var lh=Math.round(aFont*1.18),y0=ADDR.cy-(lines.length-1)*lh/2;
+          g.fillStyle='#123f28';g.textAlign='left';g.textBaseline='middle';
+          for(var i=0;i<lines.length;i++)g.fillText(lines[i],VALX,y0+i*lh);
+          dbg(VALX,ADDR.top,VALMAXW,ADDR.bot-ADDR.top,'#f80');
         })();
-        // ---- QR: panel putih (quiet-zone) + QR 1:1, EC tinggi, menutup placeholder ----
+        // ---- QR: generate asli, square 1:1, background putih + quiet-zone ----
         function finish(){cb(c.toDataURL('image/png'));}
-        var qsz=186,qcx=1287,qcy=506,qpad=22,pnl=qsz+qpad*2,pnx=qcx-pnl/2,pny=qcy-pnl/2;
         if(window.QRCode){
           var box=document.createElement('div');box.style.cssText='position:absolute;left:-9999px;top:0';document.body.appendChild(box);
-          try{new QRCode(box,{text:self.qrText(m),width:qsz,height:qsz,colorDark:'#0f3d1e',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.Q});}catch(e){}
+          try{new QRCode(box,{text:self.verifyUrl(m.id),width:QR.size,height:QR.size,colorDark:'#0f3d1e',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){}
           setTimeout(function(){
             var qc=box.querySelector('canvas')||box.querySelector('img');
-            // panel putih dgn bayangan halus → menutup placeholder QR + caption, sekaligus quiet-zone
-            g.save();g.shadowColor='rgba(18,50,25,.16)';g.shadowBlur=16;g.shadowOffsetY=4;
-            g.fillStyle='#ffffff';rr(pnx,pny,pnl,pnl,20);g.fill();g.restore();
-            g.strokeStyle='rgba(15,61,30,.12)';g.lineWidth=1.5;rr(pnx,pny,pnl,pnl,20);g.stroke();
-            if(qc){g.imageSmoothingEnabled=false;try{g.drawImage(qc,qcx-qsz/2,qcy-qsz/2,qsz,qsz);}catch(e){}g.imageSmoothingEnabled=true;}
+            // panel putih menutup QR contoh pada background + jadi quiet-zone
+            g.fillStyle='#ffffff';rr(QR.maskX,QR.maskY,QR.maskW,QR.maskH,18);g.fill();
+            if(qc){g.imageSmoothingEnabled=false;try{g.drawImage(qc,QR.cx-QR.size/2,QR.cy-QR.size/2,QR.size,QR.size);}catch(e){}g.imageSmoothingEnabled=true;}
+            dbg(QR.cx-QR.size/2,QR.cy-QR.size/2,QR.size,QR.size,'#e11');
             document.body.removeChild(box);finish();
           },60);
-        } else finish();
+        } else { g.fillStyle='#ffffff';rr(QR.maskX,QR.maskY,QR.maskW,QR.maskH,18);g.fill();finish(); }
       }
       var bg=null,photo=null,pending=1;
       function done(){if(!--pending)paint();}
