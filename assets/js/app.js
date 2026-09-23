@@ -207,18 +207,22 @@
         var vals=[m.nia,m.nama,(m.alamat&&m.alamat!=='-')?m.alamat:'-',m.desa||'-',m.kecamatan||'-','Kab. Ponorogo','Jawa Timur'];
         var cys=[455,509,562,616,670,723,776],vx=726,vmax=1132-726;
         for(var i=0;i<vals.length;i++)fit(vals[i],vx,cys[i],vmax);
-        // ---- QR: warna latar disamakan dgn kartu agar menyatu (tanpa kotak putih) ----
+        // ---- QR: warna latar disamakan dgn warna dasar kartu QR (putih) agar menyatu.
+        // Ambil beberapa titik di dalam kartu QR lalu pilih yang paling terang
+        // (warna dasar kartu), supaya tidak ada garis/seam kotak. ----
         function finish(){cb(c.toDataURL('image/png'));}
-        var cardCol='#eef3ec';
-        try{var pd=g.getImageData(1190,452,1,1).data;cardCol='rgb('+pd[0]+','+pd[1]+','+pd[2]+')';}catch(e){}
-        var qsz=196,qx=1285-qsz/2,qy=412; // pusat kotak QR template (x≈1285)
+        var cardCol='#f4f6f3';
+        try{var pts=[[1180,470],[1400,470],[1180,560],[1400,560],[1285,404],[1285,628]],best=-1;
+          for(var si=0;si<pts.length;si++){var d=g.getImageData(pts[si][0],pts[si][1],1,1).data,lu=d[0]+d[1]+d[2];
+            if(lu>best){best=lu;cardCol='rgb('+d[0]+','+d[1]+','+d[2]+')';}}}catch(e){}
+        var qsz=196,qx=1287-qsz/2,qy=402; // rata tengah kartu QR (x≈1287)
         if(window.QRCode){
           var box=document.createElement('div');box.style.cssText='position:absolute;left:-9999px;top:0';document.body.appendChild(box);
           try{new QRCode(box,{text:self.qrText(m),width:qsz,height:qsz,colorDark:'#0f3d1e',colorLight:cardCol,correctLevel:QRCode.CorrectLevel.M});}catch(e){}
           setTimeout(function(){
             var qc=box.querySelector('canvas')||box.querySelector('img');
             // tutup placeholder QR + tulisan "QR CODE (GENERATE OTOMATIS DARI SISTEM)"
-            g.fillStyle=cardCol;rr(1168,396,252,230,16);g.fill();
+            g.fillStyle=cardCol;rr(1166,392,242,238,16);g.fill();
             if(qc){g.imageSmoothingEnabled=false;try{g.drawImage(qc,qx,qy,qsz,qsz);}catch(e){}g.imageSmoothingEnabled=true;}
             document.body.removeChild(box);finish();
           },60);
