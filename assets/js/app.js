@@ -199,24 +199,26 @@
       function paint(){
         g.clearRect(0,0,W,H);
         if(bg&&bg.width)g.drawImage(bg,0,0,W,H);else{g.fillStyle='#0f3d1e';g.fillRect(0,0,W,H);}
-        // ---- FOTO anggota (kotak kiri). Kosong → biarkan placeholder pada template. ----
-        if(photo&&photo.width){var px=94,py=356,pw=336,ph=372;
+        // ---- FOTO anggota: pas di dalam bingkai putih (tidak melebihi frame) ----
+        if(photo&&photo.width){var px=104,py=360,pw=272,ph=360;
           var s=Math.max(pw/photo.width,ph/photo.height),dw=photo.width*s,dh=photo.height*s;
-          g.save();rr(px,py,pw,ph,18);g.clip();g.drawImage(photo,px+(pw-dw)/2,py+(ph-dh)/2,dw,dh);g.restore();}
+          g.save();rr(px,py,pw,ph,20);g.clip();g.drawImage(photo,px+(pw-dw)/2,py+(ph-dh)/2,dw,dh);g.restore();}
         // ---- DATA anggota di atas pil (mengikuti baris template) ----
         var vals=[m.nia,m.nama,(m.alamat&&m.alamat!=='-')?m.alamat:'-',m.desa||'-',m.kecamatan||'-','Kab. Ponorogo','Jawa Timur'];
         var cys=[455,509,562,616,670,723,776],vx=726,vmax=1132-726;
         for(var i=0;i<vals.length;i++)fit(vals[i],vx,cys[i],vmax);
-        // ---- QR: tutup placeholder QR+caption template, lalu gambar QR asli ----
+        // ---- QR: warna latar disamakan dgn kartu agar menyatu (tanpa kotak putih) ----
         function finish(){cb(c.toDataURL('image/png'));}
-        var qsz=210,qx=1306-qsz/2,qy=505-qsz/2; // pusat kotak QR template (≈1306,505)
+        var cardCol='#eef3ec';
+        try{var pd=g.getImageData(1190,452,1,1).data;cardCol='rgb('+pd[0]+','+pd[1]+','+pd[2]+')';}catch(e){}
+        var qsz=196,qx=1285-qsz/2,qy=412; // pusat kotak QR template (x≈1285)
         if(window.QRCode){
           var box=document.createElement('div');box.style.cssText='position:absolute;left:-9999px;top:0';document.body.appendChild(box);
-          try{new QRCode(box,{text:self.qrText(m),width:qsz,height:qsz,colorDark:'#0f3d1e',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){}
+          try{new QRCode(box,{text:self.qrText(m),width:qsz,height:qsz,colorDark:'#0f3d1e',colorLight:cardCol,correctLevel:QRCode.CorrectLevel.M});}catch(e){}
           setTimeout(function(){
             var qc=box.querySelector('canvas')||box.querySelector('img');
-            // masker putih menutup kotak QR & tulisan "QR CODE (GENERATE OTOMATIS…)"
-            g.fillStyle='#ffffff';rr(1188,398,236,208,16);g.fill();
+            // tutup placeholder QR + tulisan "QR CODE (GENERATE OTOMATIS DARI SISTEM)"
+            g.fillStyle=cardCol;rr(1168,396,252,230,16);g.fill();
             if(qc){g.imageSmoothingEnabled=false;try{g.drawImage(qc,qx,qy,qsz,qsz);}catch(e){}g.imageSmoothingEnabled=true;}
             document.body.removeChild(box);finish();
           },60);
