@@ -183,13 +183,14 @@
       return Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return a.id.localeCompare(b.id);});},
     mergedFind:function(id){id=(id||'').trim().toUpperCase();return this.merged().find(function(m){
       return m.id.toUpperCase()===id||m.nia===id||m.nia.replace(/\D/g,'')===id.replace(/\D/g,'');});},
-    // Render Kartu Tanda Anggota memakai SATU master coordinate system yang sama
-    // dgn ukuran ASLI background (assets/img/kta-bg.png = 1584×993). Label, ikon,
-    // titik dua, garis SUDAH ada di background — kita hanya menempel FOTO, VALUE,
-    // dan QR pada koordinat pixel tetap. Satu fungsi → Preview = Unduh PNG = Cetak.
+    // Render Kartu Tanda Anggota SEPENUHNYA di canvas (1600×1010) — TANPA gambar
+    // background. Latar, header, label, ikon, value, QR, footer semuanya digambar
+    // oleh kode yang sama, sehingga label & value MUSTAHIL bergeser (tidak ada
+    // lagi masalah "nempel"). Alamat tinggi otomatis. Hanya logo HKTI dipakai
+    // sebagai gambar. Satu fungsi → Preview = Unduh PNG = Cetak identik.
     CARD_DEBUG:false, // set true utk menampilkan kotak bounding (fine-tuning posisi)
     cardPNG:function(m,cb){
-      var self=this,W=1584,H=993,c=document.createElement('canvas');c.width=W;c.height=H;
+      var self=this,W=1600,H=1010,c=document.createElement('canvas');c.width=W;c.height=H;
       var g=c.getContext('2d');
       function rr(x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
       function fit(txt,x,cy,maxW){ // teks satu baris, mengecil otomatis agar muat pil
@@ -223,67 +224,126 @@
         g.fillStyle='#15321d';g.textAlign='left';g.textBaseline='middle';
         for(var i=0;i<lines.length;i++)g.fillText(lines[i],x,y0+i*lh);
       }
-      // ==== KOORDINAT MASTER (px, pada 1584×993) — diukur dari background asli ====
-      var FOTO={x:92,y:321,w:296,h:396,r:22};          // bingkai foto (isi penuh)
-      var VALX=721, VALMAXW=1126-721;                 // kolom value: x mulai & lebar
-      var ROWY={id:435,nama:478,desa:630,kec:678,kota:730,prov:783}; // baseline garis
-      var ADDR={cy:551,top:508,bot:600};               // area Alamat (2 garis: 530 & 571)
-      var QR={cx:1332,cy:483,size:256,maskX:1198,maskY:349,maskW:304,maskH:268};
-      function dbg(x,y,w,h,col){if(!self.CARD_DEBUG)return;g.save();g.strokeStyle=col;g.lineWidth=2;g.strokeRect(x,y,w,h);g.restore();}
-      function valLine(txt,cy){ // 1 baris nilai, baseline di atas garis
-        txt=String((txt==null||txt===''||txt==='-')?'-':txt);var sz=30;
-        do{g.font='700 '+sz+'px "Plus Jakarta Sans",system-ui,sans-serif';if(g.measureText(txt).width<=VALMAXW)break;sz--;}while(sz>20);
-        if(g.measureText(txt).width>VALMAXW){while(txt.length>2&&g.measureText(txt+'…').width>VALMAXW)txt=txt.slice(0,-1);txt+='…';}
-        g.fillStyle='#123f28';g.textAlign='left';g.textBaseline='alphabetic';g.fillText(txt,VALX,cy);
+      // ==== KARTU DIGAMBAR PENUH DI CANVAS (tanpa background image) ====
+      // Semua elemen (latar, header, label, value, QR, footer) digambar oleh kode
+      // yang sama → label & value SELALU sejajar, alamat tinggi otomatis.
+      var GD='#0c4a22',GM='#1c8a3c',GL='#1c7a38',GOLD='#e7b31e',CREAM='#eaf7e7',INK='#12331d';
+      function icon(t,cx,cy){ // ikon sederhana warna hijau
+        g.save();g.translate(cx,cy);g.fillStyle=GL;g.strokeStyle=GL;g.lineWidth=3;g.lineJoin='round';
+        if(t==='person'){g.beginPath();g.arc(0,-8,8,0,7);g.fill();g.beginPath();g.moveTo(-13,12);g.quadraticCurveTo(0,-3,13,12);g.lineTo(13,15);g.lineTo(-13,15);g.closePath();g.fill();}
+        else if(t==='home'){g.beginPath();g.moveTo(0,-14);g.lineTo(15,0);g.lineTo(10,0);g.lineTo(10,14);g.lineTo(-10,14);g.lineTo(-10,0);g.lineTo(-15,0);g.closePath();g.fill();}
+        else if(t==='pin'){g.beginPath();g.arc(0,-4,10,Math.PI,0);g.lineTo(0,16);g.closePath();g.fill();g.fillStyle='#fff';g.beginPath();g.arc(0,-4,4,0,7);g.fill();}
+        else if(t==='map'){g.beginPath();g.moveTo(-14,-10);g.lineTo(-4,-13);g.lineTo(6,-10);g.lineTo(14,-13);g.lineTo(14,12);g.lineTo(6,15);g.lineTo(-4,12);g.lineTo(-14,15);g.closePath();g.fill();g.strokeStyle='#fff';g.beginPath();g.moveTo(-4,-13);g.lineTo(-4,12);g.moveTo(6,-10);g.lineTo(6,15);g.stroke();}
+        else if(t==='building'){g.fillRect(-13,-13,11,28);g.fillRect(2,-6,12,21);g.fillStyle='#fff';for(var yy=-9;yy<12;yy+=7){g.fillRect(-10,yy,3,3);g.fillRect(-6,yy,3,3);}for(var yb=-2;yb<12;yb+=7){g.fillRect(5,yb,3,3);g.fillRect(9,yb,3,3);}}
+        else if(t==='mountain'){g.beginPath();g.moveTo(-15,14);g.lineTo(-3,-8);g.lineTo(4,3);g.lineTo(9,-5);g.lineTo(16,14);g.closePath();g.fill();}
+        g.restore();
       }
       function paint(){
         g.clearRect(0,0,W,H);
-        if(bg&&bg.width)g.drawImage(bg,0,0,W,H);else{g.fillStyle='#0f3d1e';g.fillRect(0,0,W,H);}
-        // ---- FOTO: object-fit cover di dalam bingkai (tidak stretch/gepeng) ----
-        if(photo&&photo.width){
-          var s=Math.max(FOTO.w/photo.width,FOTO.h/photo.height),dw=photo.width*s,dh=photo.height*s;
-          g.save();rr(FOTO.x,FOTO.y,FOTO.w,FOTO.h,FOTO.r);g.clip();
-          g.drawImage(photo,FOTO.x+(FOTO.w-dw)/2,FOTO.y+(FOTO.h-dh)/2,dw,dh);g.restore();
+        // ---- LATAR: kartu putih, header & footer hijau, aksen emas ----
+        g.save();rr(0,0,W,H,42);g.clip();
+        g.fillStyle='#f6faf3';g.fillRect(0,0,W,H);
+        var HH=250,FH=98;
+        var hg=g.createLinearGradient(0,0,W,HH);hg.addColorStop(0,GD);hg.addColorStop(1,GM);
+        g.fillStyle=hg;g.fillRect(0,0,W,HH);
+        g.fillStyle=GOLD;g.fillRect(0,HH,W,7);
+        var fg=g.createLinearGradient(0,H-FH,0,H);fg.addColorStop(0,GM);fg.addColorStop(1,GD);
+        g.fillStyle=fg;g.fillRect(0,H-FH,W,FH);g.fillStyle=GOLD;g.fillRect(0,H-FH-7,W,7);
+        // pola titik halus di badan
+        g.fillStyle='rgba(28,138,60,0.05)';
+        for(var yy=HH+30;yy<H-FH-10;yy+=26)for(var xx=30;xx<W;xx+=26){g.beginPath();g.arc(xx,yy,1.5,0,7);g.fill();}
+        // ---- HEADER: logo + nama organisasi ----
+        if(logo&&logo.width){var lh=150,lw=logo.width*(lh/logo.height);g.drawImage(logo,52,50,lw,lh);}
+        g.textAlign='left';g.textBaseline='alphabetic';
+        g.fillStyle='#fff';g.font='800 44px "Plus Jakarta Sans",system-ui,sans-serif';
+        g.fillText('HIMPUNAN KERUKUNAN',236,96);g.fillText('TANI INDONESIA',236,144);
+        g.fillStyle=GOLD;g.font='700 27px "Plus Jakarta Sans",system-ui,sans-serif';g.fillText('K A B U P A T E N   P O N O R O G O',238,182);
+        g.fillStyle=CREAM;g.font='italic 500 27px "Plus Jakarta Sans",system-ui,sans-serif';g.fillText('“Bersama Petani, Membangun Negeri”',238,218);
+        // slogan kanan + bendera
+        g.fillStyle='#fff';g.font='800 27px "Plus Jakarta Sans",system-ui,sans-serif';g.textAlign='right';
+        var sl=['PETANI','KUAT','INDONESIA','MAJU'];for(var i=0;i<4;i++)g.fillText(sl[i],W-64,74+i*33);
+        g.fillStyle='#d32'; g.fillRect(W-250,52,70,22); g.fillStyle='#fff'; g.fillRect(W-250,74,70,22);
+        g.textAlign='left';
+        // ---- TITLE pill (di badan, di bawah header — tidak menimpa teks header) ----
+        g.font='800 46px "Plus Jakarta Sans",system-ui,sans-serif';var tt='KARTU TANDA ANGGOTA',tw=g.measureText(tt).width;
+        var pw=tw+96,pcx=800,pty=272,pph=66;g.fillStyle=GD;rr(pcx-pw/2,pty,pw,pph,35);g.fill();
+        g.fillStyle='#fff';g.textAlign='center';g.textBaseline='middle';g.fillText(tt,pcx,pty+pph/2+2);
+        g.font='700 25px "Plus Jakarta Sans",system-ui,sans-serif';var st='HKTI KABUPATEN PONOROGO',sw=g.measureText(st).width;
+        g.fillStyle=GOLD;rr(pcx-(sw+56)/2,pty+pph-2,sw+56,40,20);g.fill();
+        g.fillStyle=GD;g.fillText(st,pcx,pty+pph+18);
+        g.textAlign='left';g.textBaseline='alphabetic';
+        // ---- FOTO (kiri): bingkai + object-fit cover ----
+        var FX=66,FY=392,FW=330,FH2=430;
+        g.fillStyle='#fff';rr(FX-6,FY-6,FW+12,FH2+12,22);g.fill();
+        g.strokeStyle=GM;g.lineWidth=6;rr(FX-6,FY-6,FW+12,FH2+12,22);g.stroke();
+        if(photo&&photo.width){var s=Math.max(FW/photo.width,FH2/photo.height),dw=photo.width*s,dh=photo.height*s;
+          g.save();rr(FX,FY,FW,FH2,16);g.clip();g.drawImage(photo,FX+(FW-dw)/2,FY+(FH2-dh)/2,dw,dh);g.restore();
+        }else{g.fillStyle='#eef4ec';rr(FX,FY,FW,FH2,16);g.fill();g.fillStyle='#9db3a2';
+          g.font='800 120px system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(self.initials(m&&m.nama),FX+FW/2,FY+FH2/2-20);
+          g.font='600 26px "Plus Jakarta Sans",system-ui,sans-serif';g.fillText('FOTO ANGGOTA',FX+FW/2,FY+FH2-40);g.textAlign='left';g.textBaseline='alphabetic';}
+        // ---- DATA: label + value digambar bersama (pasti sejajar) ----
+        var addr=(m.alamat&&m.alamat!=='-')?m.alamat:'-';
+        var rows=[['No. ID',m.nia,'person'],['Nama',m.nama,'person'],['Alamat',addr,'home'],
+          ['Desa/Kel.',m.desa||'-','pin'],['Kecamatan',m.kecamatan||'-','map'],
+          ['Kota/Kab.','Kab. Ponorogo','building'],['Provinsi','Jawa Timur','mountain']];
+        var n=rows.length,ai=2;
+        var xIcon=470,xLabel=500,xColon=690,xVal=716,pillL=706,pillR=1150,valMaxW=pillR-16-xVal;
+        var topY=392,botY=H-FH-24,availH=botY-topY;
+        var aFont=28,aLines;
+        for(;aFont>=20;aFont-=1){g.font='700 '+aFont+'px "Plus Jakarta Sans",system-ui,sans-serif';
+          aLines=wrapAt(addr,valMaxW);if(aLines.length<=3)break;}
+        if(aLines.length>3){aLines=aLines.slice(0,3);var lt=aLines[2];
+          while(lt.length>1&&g.measureText(lt+'…').width>valMaxW)lt=lt.slice(0,-1);aLines[2]=lt+'…';}
+        var aLh=Math.round(aFont*1.16);
+        var hs=[],sumH=0;for(i=0;i<n;i++){hs[i]=(i===ai)?Math.max(52,aLines.length*aLh+18):52;sumH+=hs[i];}
+        var gap=(availH-sumH)/(n+1);if(gap<6){var sc=(availH-6*(n+1))/sumH;for(i=0;i<n;i++)hs[i]*=sc;gap=6;}
+        var y=topY+gap;
+        for(i=0;i<n;i++){
+          var h=hs[i],yc=y+h/2;
+          var ph=(i===ai)?h-10:40;
+          g.fillStyle='#eaf2e6';rr(pillL,yc-ph/2,pillR-pillL,ph,14);g.fill();
+          g.strokeStyle='rgba(28,122,56,.18)';g.lineWidth=1.5;rr(pillL,yc-ph/2,pillR-pillL,ph,14);g.stroke();
+          icon(rows[i][2],xIcon,yc);
+          g.fillStyle='#144a25';g.textAlign='left';g.textBaseline='middle';
+          var lsz=27;g.font='700 27px "Plus Jakarta Sans",system-ui,sans-serif';
+          while(lsz>20&&g.measureText(rows[i][0]).width>xColon-10-xLabel){lsz--;g.font='700 '+lsz+'px "Plus Jakarta Sans",system-ui,sans-serif';}
+          g.fillText(rows[i][0],xLabel,yc);
+          g.font='700 27px "Plus Jakarta Sans",system-ui,sans-serif';g.fillText(':',xColon,yc);
+          if(i===ai){g.fillStyle=INK;g.font='700 '+aFont+'px "Plus Jakarta Sans",system-ui,sans-serif';
+            var y0=yc-(aLines.length-1)*aLh/2;for(var k=0;k<aLines.length;k++)g.fillText(aLines[k],xVal,y0+k*aLh);
+          }else fit(rows[i][1],xVal,yc,valMaxW);
+          y+=h+gap;
         }
-        dbg(FOTO.x,FOTO.y,FOTO.w,FOTO.h,'#e11');
-        // ---- VALUE data (label/ikon/titik dua/garis sudah ada di background) ----
-        valLine(m.nia,ROWY.id);          dbg(VALX,ROWY.id-30,VALMAXW,38,'#06c');
-        valLine(m.nama,ROWY.nama);       dbg(VALX,ROWY.nama-30,VALMAXW,38,'#06c');
-        valLine(m.desa,ROWY.desa);       dbg(VALX,ROWY.desa-30,VALMAXW,38,'#06c');
-        valLine(m.kecamatan,ROWY.kec);   dbg(VALX,ROWY.kec-30,VALMAXW,38,'#06c');
-        valLine('Kab. Ponorogo',ROWY.kota); dbg(VALX,ROWY.kota-30,VALMAXW,38,'#06c');
-        valLine('Jawa Timur',ROWY.prov); dbg(VALX,ROWY.prov-30,VALMAXW,38,'#06c');
-        // ---- ALAMAT: multi-baris (maks 3), kecilkan font bertahap, TANPA ellipsis dini ----
-        (function(){
-          var txt=(m.alamat&&m.alamat!=='-')?m.alamat:'-',aFont=28,lines;
-          for(;aFont>=20;aFont-=1){g.font='700 '+aFont+'px "Plus Jakarta Sans",system-ui,sans-serif';
-            lines=wrapAt(txt,VALMAXW);if(lines.length<=3)break;}
-          if(lines.length>3){lines=lines.slice(0,3);var lt=lines[2];
-            while(lt.length>1&&g.measureText(lt+'…').width>VALMAXW)lt=lt.slice(0,-1);lines[2]=lt+'…';}
-          var lh=Math.round(aFont*1.18),y0=ADDR.cy-(lines.length-1)*lh/2;
-          g.fillStyle='#123f28';g.textAlign='left';g.textBaseline='middle';
-          for(var i=0;i<lines.length;i++)g.fillText(lines[i],VALX,y0+i*lh);
-          dbg(VALX,ADDR.top,VALMAXW,ADDR.bot-ADDR.top,'#f80');
-        })();
-        // ---- QR: generate asli, square 1:1, background putih + quiet-zone ----
+        // ---- FOOTER: 3 pilar ----
+        g.fillStyle='#eaf7e7';g.font='600 26px "Plus Jakarta Sans",system-ui,sans-serif';g.textAlign='left';g.textBaseline='middle';
+        var pil=['Pertanian Berkelanjutan','Kesejahteraan Petani','Kedaulatan Pangan'],fy=H-FH/2;
+        var fx=90;for(i=0;i<3;i++){g.fillStyle=GOLD;g.beginPath();g.arc(fx,fy,6,0,7);g.fill();
+          g.fillStyle='#eaf7e7';g.fillText(pil[i],fx+18,fy);fx+=g.measureText(pil[i]).width+70;
+          if(i<2){g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=2;g.beginPath();g.moveTo(fx-42,fy-16);g.lineTo(fx-42,fy+16);g.stroke();}}
+        g.restore(); // end clip
+        // ---- QR: panel putih + quiet-zone, square 1:1, dari verifyUrl ----
+        var QX=1214,QY=452,QS=300,qcx=QX+QS/2,qtop=QY;
+        g.save();g.shadowColor='rgba(12,60,25,.18)';g.shadowBlur=18;g.shadowOffsetY=5;
+        g.fillStyle='#fff';rr(QX,QY,QS,QS,22);g.fill();g.restore();
+        g.strokeStyle='rgba(12,74,34,.15)';g.lineWidth=1.5;rr(QX,QY,QS,QS,22);g.stroke();
+        g.fillStyle=GD;g.font='700 25px "Plus Jakarta Sans",system-ui,sans-serif';g.textAlign='center';g.textBaseline='alphabetic';
+        g.fillText('Pindai untuk verifikasi',qcx,QY+QS+40);
+        g.fillStyle='#d32';g.fillRect(qcx-60,QY+QS+52,40,7);g.fillStyle='#fff';g.fillRect(qcx-20,QY+QS+52,40,7);g.fillStyle=GM;g.fillRect(qcx+20,QY+QS+52,40,7);
+        g.textAlign='left';
         function finish(){cb(c.toDataURL('image/png'));}
+        var qImg=240,qx=qcx-qImg/2,qy=QY+(QS-qImg)/2;
         if(window.QRCode){
           var box=document.createElement('div');box.style.cssText='position:absolute;left:-9999px;top:0';document.body.appendChild(box);
-          try{new QRCode(box,{text:self.verifyUrl(m.id),width:QR.size,height:QR.size,colorDark:'#0f3d1e',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){}
-          setTimeout(function(){
-            var qc=box.querySelector('canvas')||box.querySelector('img');
-            // panel putih menutup QR contoh pada background + jadi quiet-zone
-            g.fillStyle='#ffffff';rr(QR.maskX,QR.maskY,QR.maskW,QR.maskH,18);g.fill();
-            if(qc){g.imageSmoothingEnabled=false;try{g.drawImage(qc,QR.cx-QR.size/2,QR.cy-QR.size/2,QR.size,QR.size);}catch(e){}g.imageSmoothingEnabled=true;}
-            dbg(QR.cx-QR.size/2,QR.cy-QR.size/2,QR.size,QR.size,'#e11');
-            document.body.removeChild(box);finish();
-          },60);
-        } else { g.fillStyle='#ffffff';rr(QR.maskX,QR.maskY,QR.maskW,QR.maskH,18);g.fill();finish(); }
+          try{new QRCode(box,{text:self.verifyUrl(m.id),width:qImg,height:qImg,colorDark:'#0f3d1e',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){}
+          setTimeout(function(){var qc=box.querySelector('canvas')||box.querySelector('img');
+            if(qc){g.imageSmoothingEnabled=false;try{g.drawImage(qc,qx,qy,qImg,qImg);}catch(e){}g.imageSmoothingEnabled=true;}
+            document.body.removeChild(box);finish();},60);
+        } else finish();
       }
-      var bg=null,photo=null,pending=1;
+      var logo=null,photo=null,pending=1;
       function done(){if(!--pending)paint();}
       function loadImg(src,set){pending++;var im=new Image();if(/^https?:/i.test(src))im.crossOrigin='anonymous';im.onload=function(){set(im);done();};im.onerror=function(){done();};im.src=src;}
-      loadImg('assets/img/kta-bg.png',function(i){bg=i;});
+      loadImg('assets/img/logo-hkti.png',function(i){logo=i;});
       if(m&&m.foto)loadImg(m.foto,function(i){photo=i;});
       var ready=(document.fonts&&document.fonts.ready)?document.fonts.ready:Promise.resolve();
       ready.then(done);
