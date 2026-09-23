@@ -176,7 +176,11 @@
   // ---- upload foto ----
   document.getElementById('foto-file').addEventListener('change',function(e){
     var f=e.target.files[0]; if(!f)return;
-    HKTI.cropPhoto(f,function(data){ HKTI.saveOverride({id:current.id,foto:data}); openProfile(current.id); });
+    HKTI.cropPhoto(f,function(data){
+      Promise.resolve(HKTI.saveOverride({id:current.id,foto:data}))
+        .then(function(){openProfile(current.id);})
+        .catch(function(err){alert('Gagal menyimpan foto ke database: '+((err&&err.message)||err));});
+    });
     e.target.value='';
   });
 
@@ -215,15 +219,17 @@
     open('m-edit');
   };
   document.getElementById('e-save').onclick=function(){
-    HKTI.saveOverride({id:current.id,
+    var btn=this;btn.disabled=true;btn.textContent='Menyimpan…';
+    Promise.resolve(HKTI.saveOverride({id:current.id,
       nama:document.getElementById('e-nama').value||current.nama,
       ttl:document.getElementById('e-ttl').value||current.ttl,
       alamat:document.getElementById('e-alamat').value||current.alamat,
       desa:document.getElementById('e-desa').value||'',
       kecamatan:document.getElementById('e-kec').value||current.kecamatan,
       email:document.getElementById('e-email').value||'',
-      hp:document.getElementById('e-hp').value||''});
-    closeAll(); openProfile(current.id);
+      hp:document.getElementById('e-hp').value||''}))
+    .then(function(){btn.disabled=false;btn.textContent='Simpan';closeAll();openProfile(current.id);})
+    .catch(function(err){btn.disabled=false;btn.textContent='Simpan';alert('Gagal menyimpan ke database: '+((err&&err.message)||err)+'. Data belum tersimpan.');});
   };
   // Ubah password
   document.getElementById('btn-pw').onclick=function(){open('m-pw');};

@@ -156,11 +156,28 @@
     _initFB:function(){try{var c=window.FIREBASE_CONFIG;if(!window.firebase||!c||!c.projectId)return false;
       if(!firebase.apps.length)firebase.initializeApp(c);this.FB=firebase.firestore();return true;}catch(e){return false;}},
     reload:function(cb){this._ready=false;this._loading=false;this._cache=null;this.ready(cb);},
+    // Simpan perubahan anggota. Mengembalikan Promise → sukses HANYA setelah
+    // tulis database benar-benar berhasil (bila DB aktif). localStorage dipakai
+    // sebagai cache offline, bukan sumber kebenaran lintas-perangkat.
     saveOverride:function(m){
       var o=this.overrides();o[m.id]=Object.assign(o[m.id]||{},m);if(this._cache)this._cache=o;
       var ls=this._ls();ls[m.id]=Object.assign(ls[m.id]||{},m);this._saveLs(ls);
-      if(this.FB){try{this.FB.collection('members').doc(m.id).set(m,{merge:true}).catch(function(e){console.warn('DB simpan gagal:',e&&e.message);});}catch(e){}}
-      return true;},
+      if(this.FB){
+        return this.FB.collection('members').doc(m.id).set(m,{merge:true})
+          .then(function(){return {ok:true,db:true};});
+      }
+      return Promise.resolve({ok:true,db:false});},
+    // ---- Normalisasi & bantu data pertanian ----
+    normM2:function(v,u){v=parseFloat(v)||0;return u==='ha'?v*10000:v;},
+    normKg:function(v,u){v=parseFloat(v)||0;return u==='ton'?v*1000:(u==='kuintal'?v*100:v);},
+    fmtLuas:function(m2){m2=parseFloat(m2)||0;if(!m2)return '-';return m2>=10000?(+(m2/10000).toFixed(2))+' ha':Math.round(m2)+' m²';},
+    fmtPanen:function(kg){kg=parseFloat(kg)||0;if(!kg)return '-';return kg>=1000?(+(kg/1000).toFixed(2))+' ton':Math.round(kg)+' kg';},
+    landsOf:function(m){return (m&&Array.isArray(m.lands))?m.lands:[];},
+    totalLuasM2:function(m){return this.landsOf(m).reduce(function(s,l){return s+(parseFloat(l.normalizedAreaM2)||0);},0);},
+    totalPanenKg:function(m){return this.landsOf(m).reduce(function(s,l){return s+(parseFloat(l.normalizedHarvestKg)||0);},0);},
+    komoditasOf:function(m){var set={},add=function(k){if(k)set[k]=1;};
+      (m&&m.komoditas||[]).forEach(add);this.landsOf(m).forEach(function(l){(l.komoditas||[]).forEach(add);});
+      return Object.keys(set);},
     merged:function(){var o=this.overrides(),map={};this.members().forEach(function(m){map[m.id]=Object.assign({},m);});
       Object.keys(o).forEach(function(id){map[id]=Object.assign(map[id]||{},o[id]);});
       return Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return a.id.localeCompare(b.id);});},

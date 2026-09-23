@@ -45,6 +45,7 @@
       <div class="field" style="flex:1;min-width:140px;margin:0"><label>Status</label>
         <select class="input" id="fstatus"><option value="">Semua</option><option value="verified">Terverifikasi</option><option value="pending">Belum aktif</option></select></div>
       <button class="btn btn--gold" id="btn-add">＋ Tambah Anggota</button>
+      <button class="btn btn--outline" id="btn-export">⬇️ Export CSV</button>
       <button class="btn btn--outline" id="btn-reset">↻ Muat Ulang</button>
     </div>
   </div>
@@ -58,33 +59,66 @@
 
 <!-- MODAL: edit/add -->
 <div id="modal" style="display:none;position:fixed;inset:0;background:rgba(15,61,30,.55);z-index:100;padding:20px;overflow:auto">
-  <div class="card" style="max-width:520px;margin:40px auto">
+  <div class="card" style="max-width:560px;margin:30px auto">
     <h3 id="modal-title">Tambah Anggota</h3>
     <input type="hidden" id="m-id">
     <input type="hidden" id="m-foto">
-    <div class="field"><label>Foto Anggota</label>
-      <div style="display:flex;gap:12px;align-items:center">
-        <div id="m-foto-prev"></div>
-        <div style="flex:1"><input class="input" type="file" id="m-foto-file" accept="image/*">
-          <button type="button" class="btn btn--sm btn--outline" id="m-foto-clear" style="margin-top:6px">Hapus foto</button></div>
+    <div class="tabs" id="m-tabs">
+      <button type="button" class="tab is-active" data-tab="t-pribadi">Data Pribadi</button>
+      <button type="button" class="tab" data-tab="t-anggota">Keanggotaan</button>
+      <button type="button" class="tab" data-tab="t-tani">Pertanian &amp; Lahan</button>
+    </div>
+
+    <div class="tabpane is-active" id="t-pribadi">
+      <div class="field"><label>Foto Anggota</label>
+        <div style="display:flex;gap:12px;align-items:center">
+          <div id="m-foto-prev"></div>
+          <div style="flex:1"><input class="input" type="file" id="m-foto-file" accept="image/*">
+            <button type="button" class="btn btn--sm btn--outline" id="m-foto-clear" style="margin-top:6px">Hapus foto</button></div>
+        </div>
+      </div>
+      <div class="field"><label>Nama Lengkap</label><input class="input" id="m-nama"></div>
+      <div style="display:flex;gap:12px">
+        <div class="field" style="flex:1"><label>L/P</label><select class="input" id="m-jk"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div>
+        <div class="field" style="flex:2"><label>Tempat, Tgl Lahir</label><input class="input" id="m-ttl" placeholder="mis. Ponorogo, 24 Januari 1973"></div>
+      </div>
+      <div class="field"><label>Alamat Rumah</label><input class="input" id="m-alamat"></div>
+      <div style="display:flex;gap:12px">
+        <div class="field" style="flex:1"><label>Desa/Kelurahan</label><input class="input" id="m-desa"></div>
+        <div class="field" style="flex:1"><label>Kecamatan</label><input class="input" id="m-kec"></div>
       </div>
     </div>
-    <div class="field"><label>Nama Lengkap</label><input class="input" id="m-nama"></div>
-    <div style="display:flex;gap:12px">
-      <div class="field" style="flex:1"><label>L/P</label><select class="input" id="m-jk"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div>
-      <div class="field" style="flex:2"><label>Kecamatan</label><input class="input" id="m-kec"></div>
+
+    <div class="tabpane" id="t-anggota">
+      <div style="display:flex;gap:12px">
+        <div class="field" style="flex:1"><label>Jabatan</label><input class="input" id="m-jabatan" placeholder="Anggota / Ketua / ..."></div>
+        <div class="field" style="flex:1"><label>Status</label><select class="input" id="m-status"><option value="verified">Terverifikasi</option><option value="pending">Belum aktif</option></select></div>
+      </div>
+      <p class="muted" style="font-size:.82rem">No. Induk Anggota (NIA) &amp; ID kartu dibuat otomatis dari nomor urut.</p>
     </div>
-    <div class="field"><label>Tempat, Tgl Lahir</label><input class="input" id="m-ttl"></div>
-    <div class="field"><label>Alamat</label><input class="input" id="m-alamat"></div>
-    <div class="field"><label>Desa/Kelurahan</label><input class="input" id="m-desa"></div>
-    <div style="display:flex;gap:12px">
-      <div class="field" style="flex:1"><label>Jabatan</label><input class="input" id="m-jabatan" placeholder="Anggota / Ketua / ..."></div>
-      <div class="field" style="flex:1"><label>Status</label><select class="input" id="m-status"><option value="verified">Terverifikasi</option><option value="pending">Belum aktif</option></select></div>
+
+    <div class="tabpane" id="t-tani">
+      <div class="field"><label>Komoditas Utama</label>
+        <div id="m-kom-chips" class="chips"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input class="input" id="m-kom-input" list="kom-list" placeholder="Tambah komoditas…" style="flex:1">
+          <button type="button" class="btn btn--sm btn--outline" id="m-kom-add">+ Tambah</button>
+        </div>
+        <datalist id="kom-list"></datalist>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 6px">
+        <b style="font-size:.95rem">Lahan / Kebun</b>
+        <button type="button" class="btn btn--sm btn--gold" id="m-land-add">+ Tambah Lahan</button>
+      </div>
+      <div id="m-lands"></div>
+      <p class="muted" id="m-tani-sum" style="font-size:.82rem;margin-top:8px"></p>
     </div>
-    <div style="display:flex;gap:10px;margin-top:8px">
+
+    <div style="display:flex;gap:10px;margin-top:12px">
       <button class="btn btn--block" id="m-save">Simpan</button>
       <button class="btn btn--outline btn--block" id="m-cancel">Batal</button>
     </div>
+    <div id="m-msg" style="margin-top:10px"></div>
   </div>
 </div>
 
@@ -131,11 +165,14 @@
 
   function stats(list){
     var v=list.filter(function(m){return m.status==='verified';}).length;
-    var p=list.length-v;
     var kec=new Set(list.map(function(m){return m.kecamatan;}).filter(function(x){return x&&x!=='-';})).size;
-    var s=[['Total Anggota',list.length,'👥'],['Terverifikasi',v,'✅'],['Belum Aktif',p,'⏳'],['Kecamatan',kec,'📍']];
+    var lahan=0,komSet={},panen=0;
+    list.forEach(function(m){lahan+=HKTI.landsOf(m).length;panen+=HKTI.totalPanenKg(m);
+      HKTI.komoditasOf(m).forEach(function(k){komSet[k]=1;});});
+    var s=[['Total Anggota',list.length,'👥'],['Terverifikasi',v,'✅'],['Kecamatan',kec,'📍'],
+      ['Total Lahan',lahan,'🌾'],['Jenis Komoditas',Object.keys(komSet).length,'🌱'],['Estimasi Panen',HKTI.fmtPanen(panen),'⚖️']];
     document.getElementById('stats').innerHTML=s.map(function(x){
-      return '<div class="card"><div class="card__icon">'+x[2]+'</div><b style="font-size:1.7rem;color:var(--green-800)">'+x[1]+'</b><p>'+x[0]+'</p></div>';
+      return '<div class="card"><div class="card__icon">'+x[2]+'</div><b style="font-size:1.5rem;color:var(--green-800)">'+x[1]+'</b><p>'+x[0]+'</p></div>';
     }).join('');
   }
 
@@ -164,23 +201,117 @@
     HKTI.reload(function(){dbBadge();render();});
   });
 
+  // ---- tabs ----
+  document.getElementById('m-tabs').addEventListener('click',function(e){
+    var b=e.target.closest('.tab');if(!b)return;
+    [].forEach.call(document.querySelectorAll('#m-tabs .tab'),function(t){t.classList.toggle('is-active',t===b);});
+    [].forEach.call(document.querySelectorAll('.tabpane'),function(p){p.classList.toggle('is-active',p.id===b.getAttribute('data-tab'));});
+  });
+
+  // ---- komoditas chips ----
+  var komState=[];
+  (function(){var dl=document.getElementById('kom-list');
+    (window.HKTI_KOMODITAS||[]).forEach(function(k){dl.innerHTML+='<option value="'+HKTI.esc(k)+'">';});})();
+  function renderKom(){document.getElementById('m-kom-chips').innerHTML=komState.length?komState.map(function(k,i){
+    return '<span class="chip">'+HKTI.esc(k)+'<button type="button" data-kdel="'+i+'">×</button></span>';}).join(''):'<span class="muted" style="font-size:.82rem">Belum ada komoditas.</span>';}
+  function addKom(k){k=(k||'').trim();if(k&&komState.indexOf(k)<0){komState.push(k);renderKom();}}
+  document.getElementById('m-kom-add').addEventListener('click',function(){var i=document.getElementById('m-kom-input');addKom(i.value);i.value='';});
+  document.getElementById('m-kom-input').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();addKom(this.value);this.value='';}});
+  document.getElementById('m-kom-chips').addEventListener('click',function(e){var b=e.target.closest('[data-kdel]');if(b){komState.splice(+b.getAttribute('data-kdel'),1);renderKom();}});
+
+  // ---- lahan (multi) ----
+  var landState=[];
+  function landCard(l,i){
+    return '<div class="landcard" data-li="'+i+'">'+
+      '<div class="landcard__head"><b>🌾 Lahan '+(i+1)+'</b><button type="button" class="btn btn--sm btn--outline" data-ldel="'+i+'">Hapus</button></div>'+
+      '<div class="row">'+
+        '<div class="field" style="flex:2"><label>Nama/Label Lahan</label><input class="input" data-lf="name" value="'+HKTI.esc(l.name||'')+'" placeholder="mis. Sawah Utara"></div>'+
+        '<div class="field"><label>Komoditas (pisah koma)</label><input class="input" data-lf="komoditas" value="'+HKTI.esc((l.komoditas||[]).join(', '))+'"></div>'+
+      '</div>'+
+      '<div class="row">'+
+        '<div class="field"><label>Luas</label><input class="input" type="number" min="0" step="any" data-lf="area" value="'+HKTI.esc(l.area==null?'':l.area)+'"></div>'+
+        '<div class="field" style="max-width:110px"><label>Satuan</label><select class="input" data-lf="areaUnit"><option value="m2"'+(l.areaUnit==='m2'?' selected':'')+'>m²</option><option value="ha"'+(l.areaUnit==='ha'?' selected':'')+'>hektare</option></select></div>'+
+        '<div class="field"><label>Desa</label><input class="input" data-lf="village" value="'+HKTI.esc(l.village||'')+'"></div>'+
+        '<div class="field"><label>Kecamatan</label><input class="input" data-lf="district" value="'+HKTI.esc(l.district||'')+'"></div>'+
+      '</div>'+
+      '<div class="row">'+
+        '<div class="field"><label>Latitude</label><input class="input" type="number" step="any" data-lf="lat" value="'+HKTI.esc(l.latitude==null?'':l.latitude)+'"></div>'+
+        '<div class="field"><label>Longitude</label><input class="input" type="number" step="any" data-lf="lng" value="'+HKTI.esc(l.longitude==null?'':l.longitude)+'"></div>'+
+        '<div class="field" style="flex:0 0 auto;align-self:flex-end"><button type="button" class="btn btn--sm btn--outline" data-lgeo="'+i+'">📍 Lokasi Saya</button></div>'+
+        '<div class="field" style="flex:0 0 auto;align-self:flex-end"><button type="button" class="btn btn--sm btn--outline" data-lmap="'+i+'">🗺 Peta</button></div>'+
+      '</div>'+
+      '<div class="row">'+
+        '<div class="field"><label>Estimasi Panen</label><input class="input" type="number" min="0" step="any" data-lf="harvest" value="'+HKTI.esc(l.harvest==null?'':l.harvest)+'"></div>'+
+        '<div class="field" style="max-width:110px"><label>Satuan</label><select class="input" data-lf="harvestUnit"><option value="kg"'+(l.harvestUnit==='kg'?' selected':'')+'>kg</option><option value="kuintal"'+(l.harvestUnit==='kuintal'?' selected':'')+'>kuintal</option><option value="ton"'+(l.harvestUnit==='ton'?' selected':'')+'>ton</option></select></div>'+
+        '<div class="field"><label>Perkiraan Bulan Panen</label><input class="input" data-lf="harvestDate" value="'+HKTI.esc(l.harvestDate||'')+'" placeholder="mis. Maret 2027"></div>'+
+      '</div>'+
+      '<div class="field" style="margin:0"><label>Catatan</label><input class="input" data-lf="notes" value="'+HKTI.esc(l.notes||'')+'"></div>'+
+      '<div class="field" style="margin:8px 0 0"><label>Foto Lahan</label><input class="input" type="file" accept="image/*" data-lphoto="'+i+'">'+
+        (l.photo?'<img class="land-photo" src="'+HKTI.esc(l.photo)+'">':'')+'</div>'+
+    '</div>';
+  }
+  function renderLands(){
+    document.getElementById('m-lands').innerHTML=landState.length?landState.map(landCard).join(''):'<p class="muted" style="font-size:.85rem">Belum ada lahan. Klik “Tambah Lahan”.</p>';
+    landSum();
+  }
+  function collectLandsFromDOM(){
+    [].forEach.call(document.querySelectorAll('#m-lands .landcard'),function(el){
+      var i=+el.getAttribute('data-li'),l=landState[i];if(!l)return;
+      el.querySelectorAll('[data-lf]').forEach(function(inp){
+        var f=inp.getAttribute('data-lf'),v=inp.value;
+        if(f==='komoditas')l.komoditas=v.split(',').map(function(s){return s.trim();}).filter(Boolean);
+        else if(f==='lat')l.latitude=v===''?null:parseFloat(v);
+        else if(f==='lng')l.longitude=v===''?null:parseFloat(v);
+        else if(f==='area')l.area=v===''?null:parseFloat(v);
+        else if(f==='harvest')l.harvest=v===''?null:parseFloat(v);
+        else l[f]=v;
+      });
+      l.normalizedAreaM2=HKTI.normM2(l.area,l.areaUnit);
+      l.normalizedHarvestKg=HKTI.normKg(l.harvest,l.harvestUnit);
+    });
+  }
+  function landSum(){collectLandsFromDOM();
+    document.getElementById('m-tani-sum').textContent=landState.length?
+      ('Total '+landState.length+' lahan · luas '+HKTI.fmtLuas(landState.reduce(function(s,l){return s+(l.normalizedAreaM2||0);},0))+' · estimasi panen '+HKTI.fmtPanen(landState.reduce(function(s,l){return s+(l.normalizedHarvestKg||0);},0))):'';}
+  document.getElementById('m-land-add').addEventListener('click',function(){collectLandsFromDOM();landState.push({areaUnit:'m2',harvestUnit:'kg',komoditas:[]});renderLands();});
+  document.getElementById('m-lands').addEventListener('input',landSum);
+  document.getElementById('m-lands').addEventListener('click',function(e){
+    var del=e.target.closest('[data-ldel]'),geo=e.target.closest('[data-lgeo]'),map=e.target.closest('[data-lmap]');
+    if(del){collectLandsFromDOM();landState.splice(+del.getAttribute('data-ldel'),1);renderLands();return;}
+    if(geo){var i=+geo.getAttribute('data-lgeo');if(!navigator.geolocation){alert('Geolokasi tidak tersedia.');return;}
+      geo.textContent='…';navigator.geolocation.getCurrentPosition(function(p){collectLandsFromDOM();
+        landState[i].latitude=+p.coords.latitude.toFixed(6);landState[i].longitude=+p.coords.longitude.toFixed(6);renderLands();},
+        function(){geo.textContent='📍 Lokasi Saya';alert('Gagal mengambil lokasi. Izinkan akses lokasi atau isi manual.');});return;}
+    if(map){var j=+map.getAttribute('data-lmap');collectLandsFromDOM();var l=landState[j];
+      var u=(l.latitude!=null&&l.longitude!=null)?('https://www.google.com/maps?q='+l.latitude+','+l.longitude):'https://www.google.com/maps';
+      window.open(u,'_blank','noopener');}
+  });
+  document.getElementById('m-lands').addEventListener('change',function(e){
+    var ph=e.target.closest('[data-lphoto]');if(!ph)return;var f=ph.files&&ph.files[0];if(!f)return;
+    var i=+ph.getAttribute('data-lphoto');HKTI.resizePhoto(f,function(data){collectLandsFromDOM();landState[i].photo=data;renderLands();});
+  });
+
   // modal edit/add
   var modal=document.getElementById('modal');
+  function msg(html){document.getElementById('m-msg').innerHTML=html||'';}
   function openEdit(m){
     document.getElementById('modal-title').textContent=m?'Edit Anggota':'Tambah Anggota';
+    document.querySelector('#m-tabs .tab').click(); // reset ke tab pertama
     document.getElementById('m-id').value=m?m.id:'';
     document.getElementById('m-nama').value=m?m.nama:'';
     document.getElementById('m-jk').value=m?m.jk:'L';
-    document.getElementById('m-kec').value=m?(m.kecamatan||''):'';
-    document.getElementById('m-ttl').value=m?(m.ttl||''):'';
-    document.getElementById('m-alamat').value=m?(m.alamat||''):'';
+    document.getElementById('m-kec').value=m?(m.kecamatan&&m.kecamatan!=='-'?m.kecamatan:''):'';
+    document.getElementById('m-ttl').value=m?(m.ttl&&m.ttl!=='-'?m.ttl:''):'';
+    document.getElementById('m-alamat').value=m?(m.alamat&&m.alamat!=='-'?m.alamat:''):'';
     document.getElementById('m-desa').value=m?(m.desa||''):'';
     document.getElementById('m-jabatan').value=m?(m.jabatan||'Anggota'):'Anggota';
     document.getElementById('m-status').value=m?m.status:'verified';
     document.getElementById('m-foto').value=m&&m.foto?m.foto:'';
     document.getElementById('m-foto-file').value='';
     fotoPrev({nama:m?m.nama:'', foto:m?m.foto:''});
-    modal.style.display='block';
+    komState=(m&&Array.isArray(m.komoditas))?m.komoditas.slice():[];renderKom();
+    landState=(m&&Array.isArray(m.lands))?JSON.parse(JSON.stringify(m.lands)):[];renderLands();
+    msg('');modal.style.display='block';
   }
   function fotoPrev(m){document.getElementById('m-foto-prev').innerHTML=HKTI.avatar(m);}
   document.getElementById('m-foto-clear').addEventListener('click',function(){
@@ -198,6 +329,7 @@
   document.getElementById('btn-add').addEventListener('click',function(){openEdit(null);});
   document.getElementById('m-cancel').addEventListener('click',function(){modal.style.display='none';});
   document.getElementById('m-save').addEventListener('click',function(){
+    collectLandsFromDOM();
     var id=document.getElementById('m-id').value;
     var list=load();
     if(!id){ // new id
@@ -210,8 +342,30 @@
       alamat:document.getElementById('m-alamat').value||'-',desa:document.getElementById('m-desa').value||'',
       kecamatan:document.getElementById('m-kec').value||'-',
       jabatan:document.getElementById('m-jabatan').value||'Anggota',status:document.getElementById('m-status').value,
-      foto:document.getElementById('m-foto').value||'',periode:'2024–2029'};
-    saveOverride(m);modal.style.display='none';render();
+      foto:document.getElementById('m-foto').value||'',periode:'2024–2029',
+      komoditas:komState.slice(),lands:landState};
+    var btn=document.getElementById('m-save');btn.disabled=true;btn.textContent='Menyimpan…';
+    msg('<span class="muted" style="font-size:.85rem">Menyimpan ke database…</span>');
+    Promise.resolve(HKTI.saveOverride(m)).then(function(res){
+      btn.disabled=false;btn.textContent='Simpan';
+      if(res&&res.db===false){
+        msg('<div class="notice" style="font-size:.82rem">✔️ Tersimpan di perangkat ini. <b>Belum ada database online</b>, jadi belum tersinkron lintas perangkat — aktifkan database (lihat DATABASE.md).</div>');
+      }
+      modal.style.display='none';render();
+    }).catch(function(err){
+      btn.disabled=false;btn.textContent='Simpan';
+      msg('<div class="notice" style="border-left-color:var(--danger);background:#fbe9e7;border-color:#f5c6c0;color:#7a1610;font-size:.85rem">❌ Gagal menyimpan ke database: '+HKTI.esc((err&&err.message)||err)+'. Data belum tersimpan — coba lagi.</div>');
+    });
+  });
+
+  // ---- Export CSV ----
+  document.getElementById('btn-export').addEventListener('click',function(){
+    var rows=[['NIA','Nama','L/P','Jabatan','Status','Desa','Kecamatan','Komoditas','Jumlah Lahan','Total Luas (m2)','Estimasi Panen (kg)']];
+    load().forEach(function(m){rows.push([m.nia,m.nama,m.jk,HKTI.jabatanOf(m),m.status,m.desa||'',m.kecamatan||'',
+      HKTI.komoditasOf(m).join('; '),HKTI.landsOf(m).length,Math.round(HKTI.totalLuasM2(m)),Math.round(HKTI.totalPanenKg(m))]);});
+    var csv=rows.map(function(r){return r.map(function(c){c=String(c==null?'':c);return /[",\n;]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c;}).join(',');}).join('\n');
+    var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}));
+    a.download='anggota_hkti_ponorogo.csv';document.body.appendChild(a);a.click();a.remove();
   });
 
   // card modal

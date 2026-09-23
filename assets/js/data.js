@@ -597,3 +597,7 @@ window.HKTI_PENGURUS = [
  ["Ketua Bidang Pengembangan Hortikultura dan Ketahanan Pangan","Said Wahyu Ferdiansah, S.P."],
  ["Anggota Bidang Pengembangan Hortikultura dan Ketahanan Pangan","Anang Setyo"]
 ];
+
+// Master komoditas (dapat ditambah admin lewat input bebas). Dipakai untuk
+// tag komoditas pada lahan anggota.
+window.HKTI_KOMODITAS = ["Padi","Jagung","Kedelai","Tebu","Singkong","Cabai","Bawang Merah","Bawang Putih","Sayuran","Buah","Kopi","Kakao","Tembakau","Kelapa","Porang","Peternakan Sapi","Peternakan Kambing","Peternakan Ayam","Perikanan","Lainnya"];

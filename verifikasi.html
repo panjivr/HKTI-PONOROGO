@@ -95,6 +95,8 @@
           row('Kabupaten/Kota','Kab. Ponorogo')+
           row('Provinsi','Jawa Timur')+
           row('Masa Bakti',m.periode)+
+          (HKTI.komoditasOf(m).length?row('Komoditas',HKTI.komoditasOf(m).join(', ')):'')+
+          (HKTI.landsOf(m).length?row('Luas Lahan',HKTI.fmtLuas(HKTI.totalLuasM2(m))+' ('+HKTI.landsOf(m).length+' lahan)'):'')+
           '<div><dt>Status</dt><dd><span class="tag ok">Terverifikasi — Anggota Resmi</span></dd></div>'+
         '</dl>'+
         '<button class="btn btn--outline btn--sm no-print" style="margin-top:14px" onclick="window.print()">🖨 Cetak Kartu</button>'+
